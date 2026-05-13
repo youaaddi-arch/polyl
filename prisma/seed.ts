@@ -6,6 +6,19 @@ const prisma = new PrismaClient();
 
 async function main() {
   console.log("Seed: nettoyage…");
+  await prisma.activite.deleteMany();
+  await prisma.note.deleteMany();
+  await prisma.meeting.deleteMany();
+  await prisma.ticket.deleteMany();
+  await prisma.deal.deleteMany();
+  await prisma.dealPipeline.deleteMany();
+  await prisma.formulaireSubmission.deleteMany();
+  await prisma.formulaire.deleteMany();
+  await prisma.liste.deleteMany();
+  await prisma.emailTemplate.deleteMany();
+  await prisma.propValeur.deleteMany();
+  await prisma.propPersonnalisee.deleteMany();
+  await prisma.utilisateur.deleteMany();
   await prisma.communication.deleteMany();
   await prisma.document.deleteMany();
   await prisma.tache.deleteMany();
@@ -172,6 +185,165 @@ async function main() {
       { titre: "Revalorisation des aides employeur pour l'apprentissage 2025", source: "Ministère du Travail", theme: "Aides", niveauImpact: "important" },
       { titre: "Nouveau RNCP — Titre Conseiller Commercial mis à jour",       source: "France Compétences",  theme: "RNCP",  niveauImpact: "info" },
       { titre: "Barèmes OCAPIAT 2025 publiés",                                source: "OPCO OCAPIAT",        theme: "OPCO",  niveauImpact: "important" },
+    ],
+  });
+
+  console.log("Seed: pipeline de deals + deals de démo…");
+  const stagesDeal = [
+    { cle: "qualifie",     libelle: "Qualifié",     probabilite: 20, ordre: 1 },
+    { cle: "proposition",  libelle: "Proposition envoyée", probabilite: 50, ordre: 2 },
+    { cle: "negociation",  libelle: "Négociation",  probabilite: 70, ordre: 3 },
+    { cle: "gagne",        libelle: "Gagné",        probabilite: 100, ordre: 4 },
+    { cle: "perdu",        libelle: "Perdu",        probabilite: 0, ordre: 5 },
+  ];
+  const pipelineDeal = await prisma.dealPipeline.create({
+    data: { nom: "Pipeline commercial standard", stages: JSON.stringify(stagesDeal), isDefault: true },
+  });
+
+  const allEntreprises = await prisma.entreprise.findMany({ include: { entite: true } });
+  const allCandidats = await prisma.candidat.findMany();
+  for (let i = 0; i < allEntreprises.length; i++) {
+    const ent = allEntreprises[i];
+    const stage = stagesDeal[i % 4];
+    await prisma.deal.create({
+      data: {
+        titre: `Recrutement alternant — ${ent.raisonSociale}`,
+        montant: 8000 + Math.floor(Math.random() * 12000),
+        probabilite: stage.probabilite,
+        dateClotPrevue: new Date(Date.now() + (30 + i * 5) * 24 * 3600 * 1000),
+        ownerName: "Sophie Martin",
+        pipelineId: pipelineDeal.id,
+        etapeCle: stage.cle,
+        statut: stage.cle === "gagne" ? "gagnee" : stage.cle === "perdu" ? "perdue" : "ouverte",
+        entrepriseId: ent.id,
+        candidatId: allCandidats[i % allCandidats.length]?.id,
+      },
+    });
+  }
+
+  console.log("Seed: notes & activités timeline…");
+  for (const c of allCandidats.slice(0, 4)) {
+    await prisma.note.create({
+      data: {
+        contenu: `Premier contact téléphonique avec ${c.prenom}. Très motivé(e), à recontacter sous 48h pour fixer un entretien.`,
+        auteur: "Sophie Martin",
+        candidatId: c.id,
+      },
+    });
+    await prisma.activite.create({
+      data: {
+        type: "note",
+        titre: "Note ajoutée",
+        contenu: `Premier contact téléphonique avec ${c.prenom}.`,
+        auteur: "Sophie Martin",
+        candidatId: c.id,
+      },
+    });
+    await prisma.activite.create({
+      data: {
+        type: "email_envoye",
+        titre: "Email de bienvenue envoyé",
+        contenu: "Template : Bienvenue + fiche besoin",
+        auteur: "Système",
+        candidatId: c.id,
+      },
+    });
+  }
+
+  console.log("Seed: meetings…");
+  for (const c of allCandidats.slice(0, 3)) {
+    await prisma.meeting.create({
+      data: {
+        titre: `Entretien de motivation — ${c.prenom} ${c.nom}`,
+        type: "entretien",
+        dateDebut: new Date(Date.now() + 3 * 24 * 3600 * 1000),
+        dateFin: new Date(Date.now() + 3 * 24 * 3600 * 1000 + 60 * 60 * 1000),
+        lieu: "Visio Google Meet",
+        ownerName: "Sophie Martin",
+        candidatId: c.id,
+      },
+    });
+  }
+
+  console.log("Seed: tickets de support…");
+  await prisma.ticket.create({
+    data: {
+      sujet: "Problème d'accès à la plateforme pédagogique",
+      description: "L'apprenant ne reçoit pas l'email de connexion à l'espace LMS.",
+      categorie: "technique",
+      priorite: "haute",
+      statut: "en_cours",
+      ownerName: "Service support",
+      source: "email",
+      candidatId: allCandidats[0]?.id,
+    },
+  });
+  await prisma.ticket.create({
+    data: {
+      sujet: "Demande d'attestation de scolarité",
+      description: "L'entreprise demande une attestation pour le dossier OPCO.",
+      categorie: "administratif",
+      priorite: "normale",
+      statut: "nouveau",
+      source: "telephone",
+      entrepriseId: allEntreprises[0]?.id,
+    },
+  });
+
+  console.log("Seed: formulaires publics…");
+  await prisma.formulaire.create({
+    data: {
+      slug: "candidature-alternance",
+      nom: "Candidature alternance — formulaire public",
+      description: "Formulaire principal de capture des candidatures depuis le site web",
+      cibleObjet: "candidat",
+      champs: JSON.stringify([
+        { cle: "prenom", libelle: "Prénom", type: "texte", required: true },
+        { cle: "nom", libelle: "Nom", type: "texte", required: true },
+        { cle: "email", libelle: "Email", type: "email", required: true },
+        { cle: "telephone", libelle: "Téléphone", type: "tel", required: false },
+        { cle: "ville", libelle: "Ville", type: "texte", required: false },
+        { cle: "formation", libelle: "Formation souhaitée", type: "texte", required: true },
+        { cle: "message", libelle: "Votre projet", type: "textarea", required: false },
+      ]),
+    },
+  });
+
+  console.log("Seed: listes intelligentes…");
+  await prisma.liste.createMany({
+    data: [
+      { nom: "Candidats Bac+5 sans entreprise", objet: "candidat", filtres: JSON.stringify([{ champ: "etapePipeline", operateur: "lt", valeur: 13 }, { champ: "personaContient", operateur: "eq", valeur: "C3" }]) },
+      { nom: "Entreprises partenaires actives PNFB", objet: "entreprise", filtres: JSON.stringify([{ champ: "statut", operateur: "eq", valeur: "partenaire_actif" }, { champ: "entite", operateur: "eq", valeur: "PNFB" }]) },
+      { nom: "Deals à clôturer ce mois", objet: "deal", filtres: JSON.stringify([{ champ: "dateClotPrevue", operateur: "this_month", valeur: null }]) },
+    ],
+  });
+
+  console.log("Seed: templates emails…");
+  await prisma.emailTemplate.createMany({
+    data: [
+      { nom: "Bienvenue candidat", sujet: "Bienvenue chez {{entite}} — votre candidature pour {{formation}}", contenu: "<p>Bonjour {{prenom}},</p><p>Merci pour votre candidature. Notre équipe revient vers vous sous 48h.</p>", categorie: "bienvenue", variables: "prenom,entite,formation" },
+      { nom: "Prospection entreprise", sujet: "Recrutez en alternance — profils disponibles", contenu: "<p>Bonjour,</p><p>Nous avons des candidats motivés sur des formations {{secteur}} disponibles immédiatement.</p>", categorie: "prospection", variables: "secteur,raisonSociale" },
+      { nom: "Relance fiche besoin", sujet: "Avez-vous reçu notre fiche besoin ?", contenu: "<p>Bonjour {{contact}},</p><p>Petit rappel concernant la fiche besoin que nous vous avons transmise.</p>", categorie: "relance", variables: "contact,raisonSociale" },
+    ],
+  });
+
+  console.log("Seed: utilisateurs internes…");
+  await prisma.utilisateur.createMany({
+    data: [
+      { email: "admin@groupe-cfa.fr", nom: "Direction", prenom: "Admin", role: "admin" },
+      { email: "sophie.martin@groupe-cfa.fr", nom: "Martin", prenom: "Sophie", role: "manager", entiteCode: "DBS" },
+      { email: "lucas.dubois@groupe-cfa.fr", nom: "Dubois", prenom: "Lucas", role: "commercial", entiteCode: "PNFB" },
+      { email: "amelie.leroy@groupe-cfa.fr", nom: "Leroy", prenom: "Amélie", role: "pedagogique", entiteCode: "PBA" },
+    ],
+  });
+
+  console.log("Seed: propriétés personnalisées (exemple)…");
+  await prisma.propPersonnalisee.createMany({
+    data: [
+      { objet: "candidat", cle: "niveau_anglais", libelle: "Niveau d'anglais", type: "select", options: "A1,A2,B1,B2,C1,C2", ordre: 1 },
+      { objet: "candidat", cle: "permis_b", libelle: "Permis B", type: "booleen", ordre: 2 },
+      { objet: "entreprise", cle: "convention_collective", libelle: "Convention collective", type: "texte", ordre: 1 },
+      { objet: "deal", cle: "source_lead", libelle: "Source du lead", type: "select", options: "Inbound,Outbound,Recommandation,Salon", ordre: 1 },
     ],
   });
 

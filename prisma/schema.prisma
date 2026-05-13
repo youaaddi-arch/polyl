@@ -1,0 +1,322 @@
+// CRM Formation - Schéma de données
+// Couvre les entités du CDC V2.0 (section 5.2) :
+// Candidat, Entreprise, Contact, Formation, OffreAlternance,
+// ActionFormation, Contrat, Tache, Evenement, Document, Veille.
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+// ============================================================
+// ENTITÉ DU GROUPE (PNFF, DBS, PNBS, ORCEA, PNFB, PBA)
+// ============================================================
+model Entite {
+  id           String      @id @default(cuid())
+  code         String      @unique // PNFF, DBS, ...
+  nom          String
+  specialite   String
+  ville        String
+  formations   Formation[]
+  candidats    Candidat[]
+  entreprises  Entreprise[]
+  evenements   Evenement[]
+  createdAt    DateTime    @default(now())
+  updatedAt    DateTime    @updatedAt
+}
+
+// ============================================================
+// FICHE PRODUIT FORMATION (CDC section 5.3)
+// ============================================================
+model Formation {
+  id                String   @id @default(cuid())
+  intitule          String
+  codeRNCP          String?
+  niveau            String
+  type              String
+  voieAcces         String
+  dureeMois         Int?
+  rythme            String?
+  secteurs          String?
+  metiers           String?
+  competences       String?
+  debouches         String?
+  prerequis         String?
+  financements      String?
+  aidesEmployeur    String?
+  tauxReussite      Float?
+  tauxInsertion     Float?
+  argumentsCommerciaux String?
+
+  entiteId          String
+  entite            Entite   @relation(fields: [entiteId], references: [id])
+
+  candidats         Candidat[]
+  actions           ActionFormation[]
+  offres            OffreAlternance[]
+
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+}
+
+// ============================================================
+// CANDIDAT (CDC section 6 - pipeline 19 étapes)
+// ============================================================
+model Candidat {
+  id              String   @id @default(cuid())
+  nom             String
+  prenom          String
+  email           String?
+  telephone       String?
+  adresse         String?
+  ville           String?
+  codePostal      String?
+  dateNaissance   DateTime?
+
+  sourceEntree    String?
+  persona         String?
+
+  etapePipeline   Int      @default(1)
+  statut          String   @default("nouveau")
+
+  scorePositionnement Int?
+  bilanPositionnement String?
+  ficheAdaptation     String?
+  motivationNote      Int?
+
+  formationId     String?
+  formation       Formation? @relation(fields: [formationId], references: [id])
+
+  entiteId        String?
+  entite          Entite?    @relation(fields: [entiteId], references: [id])
+
+  conseillerDedie String?
+
+  contrats        Contrat[]
+  taches          Tache[]
+  documents       Document[]
+  evenements      Evenement[]    @relation("CandidatEvenement")
+  communications  Communication[]
+
+  cv              String?
+  notes           String?
+
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+}
+
+// ============================================================
+// ENTREPRISE (CDC section 7 - pipeline 17 étapes)
+// ============================================================
+model Entreprise {
+  id                String   @id @default(cuid())
+  raisonSociale     String
+  siret             String?  @unique
+  naf               String?
+  formeJuridique    String?
+  taille            String?
+  secteur           String?
+
+  adresse           String?
+  ville             String?
+  codePostal        String?
+
+  persona           String?
+
+  etapePipeline     Int      @default(1)
+  statut            String   @default("prospect")
+  scorePotentiel    Int?
+
+  sourceDetection   String?
+  urlOffre          String?
+
+  commercialDedie   String?
+
+  entiteId          String?
+  entite            Entite?  @relation(fields: [entiteId], references: [id])
+
+  contacts          Contact[]
+  offres            OffreAlternance[]
+  contrats          Contrat[]
+  taches            Tache[]
+  documents         Document[]
+  evenements        Evenement[]    @relation("EntrepriseEvenement")
+  communications    Communication[]
+
+  notes             String?
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+}
+
+// ============================================================
+// CONTACT
+// ============================================================
+model Contact {
+  id            String   @id @default(cuid())
+  prenom        String
+  nom           String
+  email         String?
+  telephone     String?
+  fonction      String?
+  estMaitreApp  Boolean  @default(false)
+  nbApprentisActuels Int @default(0)
+
+  entrepriseId  String
+  entreprise    Entreprise @relation(fields: [entrepriseId], references: [id], onDelete: Cascade)
+
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+}
+
+model OffreAlternance {
+  id              String   @id @default(cuid())
+  intitulePoste   String
+  missions        String?
+  niveau          String?
+  rythme          String?
+  dateDemarrage   DateTime?
+  localisation    String?
+
+  entrepriseId    String
+  entreprise      Entreprise @relation(fields: [entrepriseId], references: [id], onDelete: Cascade)
+
+  formationId     String?
+  formation       Formation? @relation(fields: [formationId], references: [id])
+
+  statut          String   @default("ouverte")
+
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+}
+
+model ActionFormation {
+  id              String   @id @default(cuid())
+  intitule        String
+  dateDebut       DateTime
+  dateFin         DateTime
+  lieu            String?
+  nbPlaces        Int?
+
+  formationId     String
+  formation       Formation @relation(fields: [formationId], references: [id])
+
+  contrats        Contrat[]
+
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+}
+
+model Contrat {
+  id                  String   @id @default(cuid())
+  type                String
+  dateDebut           DateTime
+  dateFin             DateTime
+  remuneration        Float?
+  opco                String?
+  numeroCERFA         String?
+
+  candidatId          String
+  candidat            Candidat @relation(fields: [candidatId], references: [id])
+
+  entrepriseId        String
+  entreprise          Entreprise @relation(fields: [entrepriseId], references: [id])
+
+  actionFormationId   String?
+  actionFormation     ActionFormation? @relation(fields: [actionFormationId], references: [id])
+
+  maitreAppContactId  String?
+
+  statut              String   @default("brouillon")
+
+  createdAt           DateTime @default(now())
+  updatedAt           DateTime @updatedAt
+}
+
+model Tache {
+  id              String   @id @default(cuid())
+  titre           String
+  description     String?
+  type            String
+  priorite        String   @default("normale")
+  statut          String   @default("a_faire")
+  echeance        DateTime?
+  assigneA        String?
+
+  candidatId      String?
+  candidat        Candidat?   @relation(fields: [candidatId], references: [id])
+
+  entrepriseId    String?
+  entreprise      Entreprise? @relation(fields: [entrepriseId], references: [id])
+
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+}
+
+model Evenement {
+  id            String   @id @default(cuid())
+  titre         String
+  type          String
+  date          DateTime
+  lieu          String?
+  description   String?
+
+  entiteId      String?
+  entite        Entite?  @relation(fields: [entiteId], references: [id])
+
+  candidats     Candidat[]   @relation("CandidatEvenement")
+  entreprises   Entreprise[] @relation("EntrepriseEvenement")
+
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+}
+
+model Document {
+  id              String   @id @default(cuid())
+  numero          Int
+  type            String
+  nom             String
+  periode         String
+  statut          String   @default("manquant")
+  source          String?
+  urlFichier      String?
+
+  candidatId      String?
+  candidat        Candidat? @relation(fields: [candidatId], references: [id])
+
+  entrepriseId    String?
+  entreprise      Entreprise? @relation(fields: [entrepriseId], references: [id])
+
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+}
+
+model Communication {
+  id              String   @id @default(cuid())
+  canal           String
+  direction       String
+  sujet           String?
+  contenu         String?
+  dateAction      DateTime @default(now())
+
+  candidatId      String?
+  candidat        Candidat?   @relation(fields: [candidatId], references: [id])
+
+  entrepriseId    String?
+  entreprise      Entreprise? @relation(fields: [entrepriseId], references: [id])
+}
+
+model Veille {
+  id            String   @id @default(cuid())
+  titre         String
+  resume        String?
+  source        String
+  urlSource     String?
+  theme         String?
+  niveauImpact  String   @default("info")
+  datePublication DateTime?
+  createdAt     DateTime @default(now())
+}

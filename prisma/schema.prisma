@@ -1,6 +1,5 @@
 // CRM Formation - Schéma de données
-// HubSpot-like : ajout de Deal, Note, Meeting, Ticket, Formulaire,
-// Liste, EmailTemplate, PropPersonnalisee, Utilisateur, Activite
+// HubSpot-like — vague 2 : ajout Workflow, Sequence, Campaign, Quote, ImportLog
 
 generator client {
   provider = "prisma-client-js"
@@ -339,7 +338,7 @@ model Meeting {
   dealId       String?
   deal         Deal?       @relation(fields: [dealId], references: [id])
   createdAt    DateTime @default(now())
-  updatedAt    DateTime @updatedAt
+  updatedAt   DateTime @updatedAt
 }
 
 model Ticket {
@@ -452,4 +451,92 @@ model Activite {
   entreprise   Entreprise? @relation(fields: [entrepriseId], references: [id], onDelete: Cascade)
   dealId       String?
   createdAt    DateTime    @default(now())
+}
+
+// ============================================================
+// VAGUE 2 — Workflow, Sequence, Campaign, Quote, ImportLog
+// ============================================================
+
+model Workflow {
+  id           String    @id @default(cuid())
+  nom          String
+  description  String?
+  declencheur  String
+  objet        String
+  conditions   String    @default("[]")
+  actions      String
+  active       Boolean   @default(true)
+  nbExecutions Int       @default(0)
+  derniereExe  DateTime?
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+}
+
+model Sequence {
+  id          String               @id @default(cuid())
+  nom         String
+  description String?
+  cibleObjet  String               @default("candidat")
+  etapes      String
+  active      Boolean              @default(true)
+  enrollments SequenceEnrollment[]
+  createdAt   DateTime             @default(now())
+  updatedAt   DateTime             @updatedAt
+}
+
+model SequenceEnrollment {
+  id            String   @id @default(cuid())
+  sequenceId    String
+  sequence      Sequence @relation(fields: [sequenceId], references: [id], onDelete: Cascade)
+  candidatId    String?
+  entrepriseId  String?
+  etapeCourante Int      @default(0)
+  statut        String   @default("active")
+  enrolledAt    DateTime @default(now())
+}
+
+model Campaign {
+  id              String    @id @default(cuid())
+  nom             String
+  sujet           String
+  contenu         String
+  listeId         String?
+  templateId      String?
+  statut          String    @default("brouillon")
+  dateEnvoi       DateTime?
+  nbDestinataires Int       @default(0)
+  nbOuvertures    Int       @default(0)
+  nbClics         Int       @default(0)
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+}
+
+model Quote {
+  id           String    @id @default(cuid())
+  numero       String    @unique
+  titre        String
+  lignes       String
+  totalHT      Float     @default(0)
+  tva          Float     @default(20)
+  totalTTC     Float     @default(0)
+  statut       String    @default("brouillon")
+  dateEmission DateTime  @default(now())
+  dateValidite DateTime?
+  dealId       String?
+  entrepriseId String?
+  candidatId   String?
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+}
+
+model ImportLog {
+  id         String   @id @default(cuid())
+  objet      String
+  nomFichier String?
+  nbLignes   Int
+  nbCrees    Int      @default(0)
+  nbErreurs  Int      @default(0)
+  statut     String   @default("termine")
+  auteur     String?
+  createdAt  DateTime @default(now())
 }

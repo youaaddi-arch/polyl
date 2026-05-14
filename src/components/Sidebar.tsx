@@ -18,12 +18,14 @@ const SECTIONS: { titre: string; items: { href: string; label: string; icon: str
       { href: "/deals", label: "Deals", icon: "💰" },
       { href: "/meetings", label: "Rendez-vous", icon: "📅" },
       { href: "/taches", label: "Tâches", icon: "✅" },
+      { href: "/quotes", label: "Devis", icon: "📄" },
     ],
   },
   {
     titre: "Service Hub",
     items: [
       { href: "/tickets", label: "Tickets", icon: "🎫" },
+      { href: "/inbox", label: "Inbox unifié", icon: "📥" },
     ],
   },
   {
@@ -32,7 +34,17 @@ const SECTIONS: { titre: string; items: { href: string; label: string; icon: str
       { href: "/formulaires", label: "Formulaires", icon: "📋" },
       { href: "/listes", label: "Listes intelligentes", icon: "🗂️" },
       { href: "/templates-emails", label: "Templates emails", icon: "✉️" },
+      { href: "/sequences", label: "Sequences", icon: "🔁" },
+      { href: "/campaigns", label: "Email campaigns", icon: "📨" },
       { href: "/evenements", label: "Événements", icon: "🗓️" },
+    ],
+  },
+  {
+    titre: "Automation & Reports",
+    items: [
+      { href: "/workflows", label: "Workflows", icon: "⚡" },
+      { href: "/reports", label: "Reports", icon: "📈" },
+      { href: "/imports", label: "Imports / Exports", icon: "↕️" },
     ],
   },
   {
@@ -62,11 +74,7 @@ export default function Sidebar() {
           <div key={sec.titre} className="mb-4">
             <div className="px-3 py-1 text-[10px] font-semibold text-gray-400 uppercase tracking-wider">{sec.titre}</div>
             {sec.items.map((item) => (
-              <Link
-                key={item.href}
-                href={item.href}
-                className="flex items-center gap-3 px-3 py-1.5 rounded-lg text-sm text-gray-700 hover:bg-brand-50 hover:text-brand-700"
-              >
+              <Link key={item.href} href={item.href} className="flex items-center gap-3 px-3 py-1.5 rounded-lg text-sm text-gray-700 hover:bg-brand-50 hover:text-brand-700">
                 <span>{item.icon}</span>
                 <span>{item.label}</span>
               </Link>
@@ -75,7 +83,7 @@ export default function Sidebar() {
         ))}
       </nav>
       <div className="px-6 py-4 border-t text-xs text-gray-400">
-        v0.2 — HubSpot-like (vague 1)
+        v0.3 — HubSpot-like (vague 2)
       </div>
     </aside>
   );

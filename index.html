@@ -1,0 +1,377 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<meta name="description" content="NunaKitchen — Street food coréenne 100% halal à emporter. Tteokbokki, poulet frit coréen, kimbap, corn dogs, bingsu et plus." />
+<title>NunaKitchen — Street Food Coréenne Halal 누나키친</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Black+Han+Sans&family=Gowun+Dodum&family=Inter:wght@300;400;500;600;700;800&family=Bagel+Fat+One&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="styles.css" />
+<link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🍜</text></svg>">
+</head>
+<body>
+
+<!-- ANNONCE BANNIÈRE -->
+<div class="top-banner">
+  <div class="marquee">
+    <span>🌙 100% HALAL CERTIFIÉ &nbsp;•&nbsp; 🚴 LIVRAISON OFFERTE DÈS 25€ &nbsp;•&nbsp; 🎁 -10% SUR VOTRE 1ÈRE COMMANDE AVEC LE CODE <b>NUNA10</b> &nbsp;•&nbsp; 🔥 NOUVEAU : CORN DOG MOZZA 🌭 &nbsp;•&nbsp; ⭐ NOTÉ 4.9/5 PAR NOS CLIENTS &nbsp;•&nbsp;</span>
+    <span>🌙 100% HALAL CERTIFIÉ &nbsp;•&nbsp; 🚴 LIVRAISON OFFERTE DÈS 25€ &nbsp;•&nbsp; 🎁 -10% SUR VOTRE 1ÈRE COMMANDE AVEC LE CODE <b>NUNA10</b> &nbsp;•&nbsp; 🔥 NOUVEAU : CORN DOG MOZZA 🌭 &nbsp;•&nbsp; ⭐ NOTÉ 4.9/5 PAR NOS CLIENTS &nbsp;•&nbsp;</span>
+  </div>
+</div>
+
+<!-- NAV -->
+<header class="navbar">
+  <a href="#hero" class="logo">
+    <span class="logo-mark">누나</span>
+    <span class="logo-text">NunaKitchen<small>· Korean Street Food</small></span>
+  </a>
+  <nav class="nav-links">
+    <a href="#menu">Menu</a>
+    <a href="#about">À propos</a>
+    <a href="#avis">Avis</a>
+    <a href="#faq">FAQ</a>
+    <a href="#contact">Contact</a>
+  </nav>
+  <button class="cart-btn" id="cartBtn" aria-label="Voir le panier">
+    🛒 <span class="cart-count" id="cartCount">0</span>
+    <span class="cart-total" id="cartTotalNav">0,00 €</span>
+  </button>
+  <button class="burger" id="burger" aria-label="Menu">☰</button>
+</header>
+
+<!-- HERO -->
+<section id="hero" class="hero">
+  <div class="hero-bg"></div>
+  <div class="hero-stamps">
+    <div class="stamp s1">한식</div>
+    <div class="stamp s2">맛있다</div>
+    <div class="stamp s3">HALAL ✓</div>
+  </div>
+  <div class="hero-content">
+    <div class="hero-tag">서울의 맛 · LE GOÛT DE SÉOUL</div>
+    <h1>Le vrai goût de la <span class="grad">street food coréenne</span><br/>livré chaud chez vous.</h1>
+    <p class="hero-sub">Tteokbokki fumant, poulet frit ultra croustillant, corn dogs fondants, bingsu glacé… Tous nos plats sont préparés à la commande avec des ingrédients <b>100% halal certifiés AVS</b>.</p>
+    <div class="hero-cta">
+      <a href="#menu" class="btn btn-primary">🍱 Commander maintenant</a>
+      <a href="#about" class="btn btn-ghost">Notre histoire</a>
+    </div>
+    <div class="hero-badges">
+      <div class="hbadge">🌙 Halal AVS</div>
+      <div class="hbadge">🚴 Livraison 30 min</div>
+      <div class="hbadge">⭐ 4.9/5 (1 248 avis)</div>
+      <div class="hbadge">🌶️ Recettes authentiques</div>
+    </div>
+  </div>
+  <div class="hero-img">
+    <img src="https://images.unsplash.com/photo-1635363638580-c2809d049eee?auto=format&fit=crop&w=900&q=80" alt="Poulet frit coréen" onerror="this.style.display='none'"/>
+  </div>
+</section>
+
+<!-- FEATURES -->
+<section class="features">
+  <div class="feat"><div class="feat-icon">🌙</div><h3>100% Halal</h3><p>Toutes nos viandes sont certifiées halal AVS. Aucune trace d'alcool ni de mirin alcoolisé dans nos recettes.</p></div>
+  <div class="feat"><div class="feat-icon">👩‍🍳</div><h3>Cuisine maison</h3><p>Préparé minute par notre cheffe coréenne Eunji, formée à Séoul.</p></div>
+  <div class="feat"><div class="feat-icon">🌶️</div><h3>Piment ajustable</h3><p>Du doux au feu de l'enfer, choisissez votre niveau d'épice.</p></div>
+  <div class="feat"><div class="feat-icon">♻️</div><h3>Emballages éco</h3><p>Boîtes 100% compostables en pulpe de canne à sucre.</p></div>
+</section>
+
+<!-- MENU -->
+<section id="menu" class="menu-section">
+  <div class="section-head">
+    <div class="kicker">메뉴 · NOTRE MENU</div>
+    <h2>De la rue de <span class="grad">Myeongdong</span> à votre porte</h2>
+    <p>Sélectionnez vos plats préférés et personnalisez votre commande.</p>
+  </div>
+
+  <div class="menu-toolbar">
+    <input type="search" id="searchInput" placeholder="🔍 Rechercher un plat (tteokbokki, poulet…)" />
+    <div class="filters" id="filters">
+      <button class="filter active" data-cat="all">Tout</button>
+      <button class="filter" data-cat="signature">⭐ Signatures</button>
+      <button class="filter" data-cat="chicken">🍗 Poulet frit</button>
+      <button class="filter" data-cat="rice">🍚 Riz & Nouilles</button>
+      <button class="filter" data-cat="street">🌭 Street snacks</button>
+      <button class="filter" data-cat="sweet">🍧 Sucré</button>
+      <button class="filter" data-cat="drinks">🥤 Boissons</button>
+      <button class="filter" data-cat="veggie">🌱 Végé</button>
+    </div>
+  </div>
+
+  <div class="menu-grid" id="menuGrid"></div>
+</section>
+
+<!-- PROMO COMBO -->
+<section class="combo-section">
+  <div class="combo-card">
+    <div class="combo-text">
+      <div class="kicker light">🎉 OFFRE FAMILLE</div>
+      <h2>Combo Séoul Night</h2>
+      <p>1 Tteokbokki XL + 8 ailes de poulet frit Yangnyeom + 4 Mandu + 2 Bingsu fraise + 4 boissons.<br/><b>Pour 4 personnes — au lieu de 64€</b></p>
+      <div class="combo-price">49,90 €</div>
+      <button class="btn btn-primary" onclick="addCombo()">Ajouter au panier 🛒</button>
+    </div>
+    <div class="combo-img">
+      <img src="https://images.unsplash.com/photo-1583224964978-2257b960c3d3?auto=format&fit=crop&w=800&q=80" alt="Combo coréen" onerror="this.style.display='none'"/>
+    </div>
+  </div>
+</section>
+
+<!-- À PROPOS -->
+<section id="about" class="about-section">
+  <div class="about-img">
+    <img src="https://images.unsplash.com/photo-1604908176997-125f25cc6f3d?auto=format&fit=crop&w=800&q=80" alt="Cuisine coréenne" onerror="this.style.display='none'"/>
+    <div class="about-floating">
+      <div class="num">10+</div>
+      <div class="lbl">ans de passion coréenne</div>
+    </div>
+  </div>
+  <div class="about-text">
+    <div class="kicker">우리 이야기 · NOTRE HISTOIRE</div>
+    <h2>Une grande sœur derrière chaque plat.</h2>
+    <p><b>"Nuna" (누나)</b>, c'est le mot affectueux qu'un petit frère utilise pour appeler sa grande sœur en coréen. C'est exactement l'esprit de notre cuisine : généreuse, chaleureuse, faite avec amour comme à la maison.</p>
+    <p>Eunji a grandi à Busan, entourée des odeurs des marchés de nuit. Arrivée en France en 2014, elle a constaté qu'il était quasi impossible de trouver une vraie street food coréenne <b>halal</b>. NunaKitchen est né en 2021 pour combler ce manque — sans compromis sur l'authenticité.</p>
+    <ul class="about-points">
+      <li>✅ Viandes certifiées <b>halal AVS</b></li>
+      <li>✅ Pâte de piment <b>gochujang</b> maison sans alcool</li>
+      <li>✅ Aucun <b>mirin</b> alcoolisé — remplacé par jus de raisin réduit</li>
+      <li>✅ Huile de friture changée 2× par jour</li>
+      <li>✅ Cuisine séparée pour les plats végé</li>
+    </ul>
+  </div>
+</section>
+
+<!-- AVIS -->
+<section id="avis" class="reviews-section">
+  <div class="section-head">
+    <div class="kicker">리뷰 · ILS NOUS AIMENT</div>
+    <h2>4.9/5 sur <span class="grad">1 248 avis</span></h2>
+  </div>
+  <div class="reviews-grid">
+    <div class="review"><div class="stars">★★★★★</div><p>"Le meilleur tteokbokki halal de Paris, sans hésitation. Le poulet Yangnyeom est à tomber 🤤"</p><div class="reviewer">— Yasmine K., Paris 18e</div></div>
+    <div class="review"><div class="stars">★★★★★</div><p>"Enfin un endroit où je peux manger coréen sans me poser de questions. Halal, savoureux, copieux. Bravo !"</p><div class="reviewer">— Mehdi B., Saint-Denis</div></div>
+    <div class="review"><div class="stars">★★★★★</div><p>"Le corn dog mozza fromage = ma nouvelle obsession. Le service est rapide et l'emballage adorable."</p><div class="reviewer">— Sarah L., Aubervilliers</div></div>
+    <div class="review"><div class="stars">★★★★★</div><p>"Bingsu fraise parfait pour l'été. Mes enfants en redemandent toutes les semaines."</p><div class="reviewer">— Amina T., Boulogne</div></div>
+  </div>
+</section>
+
+<!-- FIDÉLITÉ -->
+<section class="loyalty-section">
+  <div class="loyalty-card">
+    <div class="loyalty-icon">🎁</div>
+    <h2>Programme Nuna Star</h2>
+    <p>1€ dépensé = 1 point. Atteignez 100 points et recevez un <b>plat signature offert</b>. Anniversaire ? Surprise garantie 🎂</p>
+    <button class="btn btn-secondary" onclick="document.getElementById('signupModal').classList.add('open')">Créer mon compte gratuitement</button>
+  </div>
+</section>
+
+<!-- FAQ -->
+<section id="faq" class="faq-section">
+  <div class="section-head">
+    <div class="kicker">FAQ · QUESTIONS FRÉQUENTES</div>
+    <h2>On vous répond.</h2>
+  </div>
+  <div class="faq-list">
+    <details><summary>Vos plats sont-ils tous halal ?</summary><p>Oui, à 100%. Toutes nos viandes (poulet, bœuf) sont certifiées <b>halal AVS</b>. Nous n'utilisons jamais de porc, lard, mirin alcoolisé, vin de riz ou alcool de cuisine. Notre gochujang est préparé maison sans alcool.</p></details>
+    <details><summary>Quels sont les délais de livraison ?</summary><p>Entre 25 et 40 minutes selon votre zone. Livraison gratuite dès 25€ dans un rayon de 5 km. Au-delà, 3,90€.</p></details>
+    <details><summary>Puis-je venir chercher ma commande ?</summary><p>Oui ! Sélectionnez "À emporter" lors du checkout et passez retirer 15 min après commande. Adresse : 42 rue de la Goutte d'Or, 75018 Paris.</p></details>
+    <details><summary>Comment ajuster le niveau de piment ?</summary><p>Chaque plat épicé propose 4 niveaux : 🌶️ Doux · 🌶️🌶️ Moyen · 🌶️🌶️🌶️ Fort · 🌶️🌶️🌶️🌶️ Volcan. Sélectionnez votre niveau dans la fiche du plat.</p></details>
+    <details><summary>Avez-vous des options végétariennes / véganes ?</summary><p>Oui, filtrez par "🌱 Végé" dans le menu. Notre Bibimbap végé, Mandu légumes et Tteokbokki végan sont parmi nos best-sellers.</p></details>
+    <details><summary>Quels sont les allergènes ?</summary><p>Chaque plat liste ses allergènes (gluten, soja, sésame, œuf, arachides, fruits à coque, lait). Mentionnez vos allergies dans les "instructions spéciales" lors du checkout.</p></details>
+    <details><summary>Comment payer ?</summary><p>CB, Apple Pay, Google Pay, tickets restaurant (Edenred, Swile, Pluxee), espèces à la livraison.</p></details>
+    <details><summary>Avez-vous un service traiteur / événements ?</summary><p>Oui, pour 10 personnes minimum. Contactez-nous à <b>events@nunakitchen.fr</b> — devis sous 24h.</p></details>
+  </div>
+</section>
+
+<!-- CONTACT -->
+<section id="contact" class="contact-section">
+  <div class="contact-info">
+    <div class="kicker">연락처 · CONTACT</div>
+    <h2>Venez nous voir.</h2>
+    <div class="ci-block">
+      <div class="ci-row"><span>📍</span><div><b>Adresse</b><br/>42 rue de la Goutte d'Or, 75018 Paris</div></div>
+      <div class="ci-row"><span>🕒</span><div><b>Horaires</b><br/>Mar – Dim : 11h30 – 23h00<br/>Lundi : fermé</div></div>
+      <div class="ci-row"><span>📞</span><div><b>Téléphone</b><br/><a href="tel:+33180000000">01 80 00 00 00</a></div></div>
+      <div class="ci-row"><span>📧</span><div><b>Email</b><br/><a href="mailto:hello@nunakitchen.fr">hello@nunakitchen.fr</a></div></div>
+      <div class="ci-row"><span>🚇</span><div><b>Métro</b><br/>Barbès-Rochechouart (L2/L4) · 3 min à pied</div></div>
+    </div>
+    <div class="socials">
+      <a href="#" aria-label="Instagram">📷 @nunakitchen</a>
+      <a href="#" aria-label="TikTok">🎵 @nunakitchen</a>
+      <a href="#" aria-label="Facebook">f /nunakitchen</a>
+    </div>
+  </div>
+  <form class="contact-form" id="contactForm" onsubmit="sendContact(event)">
+    <h3>Une question ? Écrivez-nous.</h3>
+    <input type="text" placeholder="Votre nom" required />
+    <input type="email" placeholder="Votre email" required />
+    <input type="text" placeholder="Sujet" />
+    <textarea rows="5" placeholder="Votre message…" required></textarea>
+    <button type="submit" class="btn btn-primary">Envoyer ✉️</button>
+  </form>
+</section>
+
+<!-- NEWSLETTER -->
+<section class="newsletter">
+  <h3>📬 Newsletter NunaKitchen</h3>
+  <p>Recevez nos nouveaux plats, offres et événements coréens directement dans votre boîte mail.</p>
+  <form class="news-form" onsubmit="event.preventDefault(); alert('Merci ! Vous êtes inscrit·e 🌸'); this.reset();">
+    <input type="email" placeholder="votre@email.fr" required />
+    <button type="submit" class="btn btn-primary">S'inscrire</button>
+  </form>
+</section>
+
+<!-- FOOTER -->
+<footer class="footer">
+  <div class="footer-grid">
+    <div>
+      <div class="logo logo-footer">
+        <span class="logo-mark">누나</span>
+        <span class="logo-text">NunaKitchen</span>
+      </div>
+      <p>Street food coréenne 100% halal, faite avec amour à Paris depuis 2021.</p>
+    </div>
+    <div>
+      <h4>Menu</h4>
+      <a href="#menu">Tous les plats</a><a href="#menu">Signatures</a><a href="#menu">Poulet frit</a><a href="#menu">Sucré</a>
+    </div>
+    <div>
+      <h4>Maison</h4>
+      <a href="#about">À propos</a><a href="#avis">Avis</a><a href="#faq">FAQ</a><a href="#contact">Contact</a>
+    </div>
+    <div>
+      <h4>Légal</h4>
+      <a href="#">Mentions légales</a><a href="#">CGV</a><a href="#">Confidentialité</a><a href="#">Allergènes</a>
+    </div>
+  </div>
+  <div class="footer-bottom">
+    © 2026 NunaKitchen SAS · SIRET 000 000 000 00000 · Tous droits réservés · 🌙 Certifié halal AVS · Fait avec ❤️ à Paris
+  </div>
+</footer>
+
+<!-- BOUTON RETOUR HAUT -->
+<button id="toTop" aria-label="Retour en haut">↑</button>
+
+<!-- DRAWER PANIER -->
+<aside class="cart-drawer" id="cartDrawer">
+  <div class="cart-head">
+    <h3>🛒 Votre panier</h3>
+    <button class="close-btn" onclick="toggleCart()">✕</button>
+  </div>
+  <div class="cart-items" id="cartItems"></div>
+  <div class="cart-foot">
+    <div class="promo-row">
+      <input type="text" id="promoCode" placeholder="Code promo (ex: NUNA10)" />
+      <button onclick="applyPromo()">Appliquer</button>
+    </div>
+    <div class="cart-line"><span>Sous-total</span><b id="subtotal">0,00 €</b></div>
+    <div class="cart-line" id="discountRow" style="display:none;"><span>Réduction</span><b id="discount">- 0,00 €</b></div>
+    <div class="cart-line"><span>Livraison</span><b id="deliveryFee">3,90 €</b></div>
+    <div class="cart-line total"><span>Total</span><b id="total">0,00 €</b></div>
+    <button class="btn btn-primary btn-full" onclick="openCheckout()">Passer commande →</button>
+  </div>
+</aside>
+<div class="overlay" id="overlay" onclick="toggleCart()"></div>
+
+<!-- MODALE PRODUIT -->
+<div class="modal" id="productModal">
+  <div class="modal-content product-modal">
+    <button class="close-btn" onclick="closeModal('productModal')">✕</button>
+    <div id="productDetails"></div>
+  </div>
+</div>
+
+<!-- MODALE CHECKOUT -->
+<div class="modal" id="checkoutModal">
+  <div class="modal-content checkout-modal">
+    <button class="close-btn" onclick="closeModal('checkoutModal')">✕</button>
+    <h2>🍱 Finaliser ma commande</h2>
+
+    <div class="checkout-tabs">
+      <button class="ck-tab active" data-mode="delivery" onclick="setMode('delivery')">🚴 Livraison</button>
+      <button class="ck-tab" data-mode="pickup" onclick="setMode('pickup')">🏃 À emporter</button>
+      <button class="ck-tab" data-mode="dinein" onclick="setMode('dinein')">🍜 Sur place</button>
+    </div>
+
+    <form id="checkoutForm" onsubmit="placeOrder(event)">
+      <div class="form-grid">
+        <div><label>Prénom *</label><input type="text" required name="fname" /></div>
+        <div><label>Nom *</label><input type="text" required name="lname" /></div>
+        <div><label>Email *</label><input type="email" required name="email" /></div>
+        <div><label>Téléphone *</label><input type="tel" required name="phone" /></div>
+        <div class="full delivery-only"><label>Adresse de livraison *</label><input type="text" name="address" placeholder="N°, rue, code postal, ville" /></div>
+        <div class="delivery-only"><label>Code interphone / digicode</label><input type="text" name="digicode" /></div>
+        <div class="delivery-only"><label>Étage / appartement</label><input type="text" name="floor" /></div>
+        <div><label>Créneau souhaité *</label>
+          <select required name="slot">
+            <option value="">Choisir…</option>
+            <option>Dès que possible (~30 min)</option>
+            <option>12h00 - 12h30</option>
+            <option>12h30 - 13h00</option>
+            <option>13h00 - 13h30</option>
+            <option>19h00 - 19h30</option>
+            <option>19h30 - 20h00</option>
+            <option>20h00 - 20h30</option>
+            <option>20h30 - 21h00</option>
+          </select>
+        </div>
+        <div><label>Mode de paiement *</label>
+          <select required name="payment">
+            <option value="">Choisir…</option>
+            <option>💳 Carte bancaire</option>
+            <option>🍎 Apple Pay</option>
+            <option>📱 Google Pay</option>
+            <option>🎫 Ticket restaurant</option>
+            <option>💵 Espèces (à la livraison)</option>
+          </select>
+        </div>
+        <div class="full"><label>Allergies / instructions spéciales</label><textarea rows="3" name="notes" placeholder="Ex : Sans cacahuètes, pas trop épicé, sonnez fort…"></textarea></div>
+        <div class="full check-row">
+          <label class="check"><input type="checkbox" required /> J'accepte les <a href="#">CGV</a> et la <a href="#">politique de confidentialité</a>.</label>
+          <label class="check"><input type="checkbox" /> Je souhaite recevoir des offres et nouveautés par email.</label>
+        </div>
+      </div>
+
+      <div class="checkout-summary" id="checkoutSummary"></div>
+
+      <button type="submit" class="btn btn-primary btn-full btn-lg">Payer <span id="payBtnAmount">0,00 €</span> →</button>
+      <p class="ck-secure">🔒 Paiement 100% sécurisé · SSL · Conforme PCI-DSS</p>
+    </form>
+  </div>
+</div>
+
+<!-- MODALE CONFIRMATION -->
+<div class="modal" id="successModal">
+  <div class="modal-content success-modal">
+    <div class="success-icon">✅</div>
+    <h2>Commande confirmée !</h2>
+    <p>Merci <b id="successName">!</b> Votre commande <b id="orderRef">#NUNA-0000</b> est en préparation.</p>
+    <p>Vous recevrez un email de confirmation à <b id="successEmail"></b>.</p>
+    <div class="estimate">⏱️ Estimation : <b id="successEta">30 min</b></div>
+    <button class="btn btn-primary" onclick="closeModal('successModal')">Parfait, merci !</button>
+  </div>
+</div>
+
+<!-- MODALE INSCRIPTION FIDÉLITÉ -->
+<div class="modal" id="signupModal">
+  <div class="modal-content">
+    <button class="close-btn" onclick="closeModal('signupModal')">✕</button>
+    <h2>🎁 Rejoignez les Nuna Stars</h2>
+    <p>Cumulez des points à chaque commande et recevez des récompenses exclusives.</p>
+    <form onsubmit="event.preventDefault(); closeModal('signupModal'); alert('Bienvenue ! Vous avez reçu 10 points de bienvenue 🌟');">
+      <input type="text" placeholder="Prénom" required />
+      <input type="email" placeholder="Email" required />
+      <input type="date" required />
+      <small>Votre date de naissance pour la surprise d'anniversaire 🎂</small>
+      <button class="btn btn-primary btn-full">Créer mon compte</button>
+    </form>
+  </div>
+</div>
+
+<!-- TOAST -->
+<div id="toast" class="toast"></div>
+
+<script src="app.js"></script>
+</body>
+</html>

@@ -5,6 +5,7 @@ import { PIPELINE_CANDIDAT } from "@/lib/pipelines";
 import { changerEtapeCandidat } from "@/actions/candidats";
 import AjouterNote from "@/components/AjouterNote";
 import Timeline from "@/components/Timeline";
+import CustomProperties from "@/components/CustomProperties";
 
 export const dynamic = "force-dynamic";
 
@@ -73,6 +74,8 @@ export default async function FicheCandidat({ params }: { params: { id: string }
           <Row label="Note motivation" value={c.motivationNote?.toString()} />
         </div>
       </section>
+
+      <CustomProperties objet="candidat" objetId={c.id} />
 
       <section className="card p-5">
         <h2 className="font-semibold mb-3">Pipeline (19 étapes)</h2>

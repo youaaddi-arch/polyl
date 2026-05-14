@@ -5,6 +5,7 @@ import { PIPELINE_ENTREPRISE } from "@/lib/pipelines";
 import { changerEtapeEntreprise } from "@/actions/entreprises";
 import AjouterNote from "@/components/AjouterNote";
 import Timeline from "@/components/Timeline";
+import CustomProperties from "@/components/CustomProperties";
 
 export const dynamic = "force-dynamic";
 
@@ -58,6 +59,8 @@ export default async function FicheEntreprise({ params }: { params: { id: string
           <Row label="Commercial dédié" value={e.commercialDedie} />
           <Row label="Score potentiel" value={e.scorePotentiel ? `${e.scorePotentiel}/100` : null} />
         </div>
+
+        <CustomProperties objet="entreprise" objetId={e.id} />
 
         <div className="card p-5 space-y-3">
           <h2 className="font-semibold">Contacts</h2>

@@ -3,36 +3,52 @@
 @tailwind utilities;
 
 html, body {
-  background: #f6f7fb;
-  color: #1f2937;
+  background: #F5F8FA;
+  color: #33475B;
+  font-family: ui-sans-serif, system-ui, -apple-system, "Lexend Deca", "Avenir Next", Helvetica, sans-serif;
 }
 
 .card {
-  @apply bg-white rounded-xl border border-gray-200 shadow-sm;
+  @apply bg-white rounded-md border border-hubspot-border shadow-hs;
 }
 
 .btn {
-  @apply inline-flex items-center px-4 py-2 rounded-lg font-medium text-sm transition;
+  @apply inline-flex items-center px-4 py-2 rounded font-semibold text-sm transition;
 }
 
 .btn-primary {
-  @apply btn bg-brand-600 text-white hover:bg-brand-700;
+  @apply btn bg-hubspot-orange text-white hover:bg-hubspot-orange-hover;
 }
 
 .btn-secondary {
-  @apply btn bg-white text-gray-700 border border-gray-200 hover:bg-gray-50;
+  @apply btn bg-white text-hubspot-text border border-hubspot-border hover:bg-hubspot-bg-alt;
+}
+
+.btn-link {
+  @apply text-hubspot-orange hover:underline font-medium text-sm;
 }
 
 .badge {
-  @apply inline-flex items-center px-2 py-0.5 rounded-md text-xs font-medium;
+  @apply inline-flex items-center px-2 py-0.5 rounded text-xs font-semibold;
 }
 
 table.crm {
   @apply w-full text-sm;
 }
 table.crm th {
-  @apply text-left px-4 py-2 bg-gray-50 text-gray-600 font-medium border-b;
+  @apply text-left px-4 py-3 bg-hubspot-bg-alt text-hubspot-text-secondary font-semibold text-xs uppercase tracking-wide border-b border-hubspot-border;
 }
 table.crm td {
-  @apply px-4 py-3 border-b;
+  @apply px-4 py-3 border-b border-hubspot-border;
+}
+table.crm tr:hover {
+  @apply bg-hubspot-bg;
+}
+
+.page-header {
+  @apply bg-white border-b border-hubspot-border px-8 py-5;
+}
+
+a.hs-link {
+  @apply text-hubspot-orange hover:underline;
 }

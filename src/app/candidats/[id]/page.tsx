@@ -3,13 +3,27 @@ import { notFound } from "next/navigation";
 import { prisma } from "@/lib/db";
 import { PIPELINE_CANDIDAT } from "@/lib/pipelines";
 import { changerEtapeCandidat } from "@/actions/candidats";
+import AjouterNote from "@/components/AjouterNote";
+import Timeline from "@/components/Timeline";
 
 export const dynamic = "force-dynamic";
 
 export default async function FicheCandidat({ params }: { params: { id: string } }) {
   const c = await prisma.candidat.findUnique({
     where: { id: params.id },
-    include: { formation: { include: { entite: true } }, entite: true, taches: true, contrats: { include: { entreprise: true } }, documents: true, communications: true },
+    include: {
+      formation: { include: { entite: true } },
+      entite: true,
+      taches: true,
+      contrats: { include: { entreprise: true } },
+      documents: true,
+      communications: true,
+      notesObjet: { orderBy: { createdAt: "desc" } },
+      meetings: { orderBy: { dateDebut: "desc" } },
+      tickets: { orderBy: { createdAt: "desc" } },
+      activites: { orderBy: { createdAt: "desc" }, take: 30 },
+      deals: true,
+    },
   });
   if (!c) notFound();
 
@@ -86,30 +100,65 @@ export default async function FicheCandidat({ params }: { params: { id: string }
         </ol>
       </section>
 
-      <section className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        <div className="card p-5">
-          <h2 className="font-semibold mb-3">Tâches</h2>
-          <ul className="divide-y">
-            {c.taches.map((t) => (
-              <li key={t.id} className="py-2 text-sm flex justify-between">
-                <span>{t.titre}</span>
-                <span className="text-gray-400">{t.statut}</span>
-              </li>
-            ))}
-            {c.taches.length === 0 && <li className="text-sm text-gray-400 py-2">Aucune tâche</li>}
-          </ul>
+      <section className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <div className="card p-5 lg:col-span-2 space-y-4">
+          <h2 className="font-semibold">📝 Notes & Timeline 360°</h2>
+          <AjouterNote candidatId={c.id} />
+          <Timeline items={[
+            ...c.activites.map((a) => ({ id: a.id, type: a.type, titre: a.titre, contenu: a.contenu, auteur: a.auteur, createdAt: a.createdAt })),
+            ...c.notesObjet.map((n) => ({ id: `note-${n.id}`, type: "note", titre: "Note", contenu: n.contenu, auteur: n.auteur, createdAt: n.createdAt })),
+          ].sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime()).slice(0, 30)} />
         </div>
-        <div className="card p-5">
-          <h2 className="font-semibold mb-3">Contrats</h2>
-          <ul className="divide-y">
-            {c.contrats.map((ct) => (
-              <li key={ct.id} className="py-2 text-sm flex justify-between">
-                <span>{ct.type} · {ct.entreprise.raisonSociale}</span>
-                <span className="text-gray-400">{ct.statut}</span>
-              </li>
-            ))}
-            {c.contrats.length === 0 && <li className="text-sm text-gray-400 py-2">Aucun contrat</li>}
-          </ul>
+
+        <div className="space-y-6">
+          <div className="card p-5">
+            <h2 className="font-semibold mb-3">📅 Rendez-vous</h2>
+            <ul className="divide-y">
+              {c.meetings.map((m) => (
+                <li key={m.id} className="py-2 text-sm">
+                  <div className="font-medium">{m.titre}</div>
+                  <div className="text-xs text-gray-500">{new Intl.DateTimeFormat("fr-FR", { dateStyle: "medium", timeStyle: "short" }).format(m.dateDebut)} · {m.lieu ?? "—"}</div>
+                </li>
+              ))}
+              {c.meetings.length === 0 && <li className="text-sm text-gray-400 py-2">Aucun RDV</li>}
+            </ul>
+          </div>
+          <div className="card p-5">
+            <h2 className="font-semibold mb-3">💼 Deals</h2>
+            <ul className="divide-y">
+              {c.deals.map((d) => (
+                <li key={d.id} className="py-2 text-sm flex justify-between">
+                  <Link href={`/deals/${d.id}`} className="text-brand-600 hover:underline">{d.titre}</Link>
+                  <span className="text-gray-400">{d.montant ? `${d.montant.toLocaleString("fr-FR")} €` : "—"}</span>
+                </li>
+              ))}
+              {c.deals.length === 0 && <li className="text-sm text-gray-400 py-2">Aucun deal</li>}
+            </ul>
+          </div>
+          <div className="card p-5">
+            <h2 className="font-semibold mb-3">✅ Tâches</h2>
+            <ul className="divide-y">
+              {c.taches.map((t) => (
+                <li key={t.id} className="py-2 text-sm flex justify-between">
+                  <span>{t.titre}</span>
+                  <span className="text-gray-400">{t.statut}</span>
+                </li>
+              ))}
+              {c.taches.length === 0 && <li className="text-sm text-gray-400 py-2">Aucune tâche</li>}
+            </ul>
+          </div>
+          <div className="card p-5">
+            <h2 className="font-semibold mb-3">🎫 Tickets</h2>
+            <ul className="divide-y">
+              {c.tickets.map((t) => (
+                <li key={t.id} className="py-2 text-sm flex justify-between">
+                  <Link href={`/tickets/${t.id}`} className="text-brand-600 hover:underline">{t.sujet}</Link>
+                  <span className="text-gray-400">{t.statut}</span>
+                </li>
+              ))}
+              {c.tickets.length === 0 && <li className="text-sm text-gray-400 py-2">Aucun ticket</li>}
+            </ul>
+          </div>
         </div>
       </section>
     </div>

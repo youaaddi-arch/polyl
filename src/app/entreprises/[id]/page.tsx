@@ -3,13 +3,26 @@ import { notFound } from "next/navigation";
 import { prisma } from "@/lib/db";
 import { PIPELINE_ENTREPRISE } from "@/lib/pipelines";
 import { changerEtapeEntreprise } from "@/actions/entreprises";
+import AjouterNote from "@/components/AjouterNote";
+import Timeline from "@/components/Timeline";
 
 export const dynamic = "force-dynamic";
 
 export default async function FicheEntreprise({ params }: { params: { id: string } }) {
   const e = await prisma.entreprise.findUnique({
     where: { id: params.id },
-    include: { entite: true, contacts: true, offres: true, contrats: { include: { candidat: true } }, taches: true },
+    include: {
+      entite: true,
+      contacts: true,
+      offres: true,
+      contrats: { include: { candidat: true } },
+      taches: true,
+      deals: true,
+      meetings: { orderBy: { dateDebut: "desc" } },
+      notesObjet: { orderBy: { createdAt: "desc" } },
+      tickets: { orderBy: { createdAt: "desc" } },
+      activites: { orderBy: { createdAt: "desc" }, take: 30 },
+    },
   });
   if (!e) notFound();
   const etapeCourante = PIPELINE_ENTREPRISE.find((x) => x.numero === e.etapePipeline);
@@ -60,6 +73,55 @@ export default async function FicheEntreprise({ params }: { params: { id: string
               ))}
             </ul>
           )}
+        </div>
+      </section>
+
+      <section className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <div className="card p-5 lg:col-span-2 space-y-4">
+          <h2 className="font-semibold">📝 Notes & Timeline 360°</h2>
+          <AjouterNote entrepriseId={e.id} />
+          <Timeline items={[
+            ...e.activites.map((a) => ({ id: a.id, type: a.type, titre: a.titre, contenu: a.contenu, auteur: a.auteur, createdAt: a.createdAt })),
+            ...e.notesObjet.map((n) => ({ id: `note-${n.id}`, type: "note", titre: "Note", contenu: n.contenu, auteur: n.auteur, createdAt: n.createdAt })),
+          ].sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime()).slice(0, 30)} />
+        </div>
+        <div className="space-y-6">
+          <div className="card p-5">
+            <h2 className="font-semibold mb-3">💼 Deals</h2>
+            <ul className="divide-y">
+              {e.deals.map((d) => (
+                <li key={d.id} className="py-2 text-sm flex justify-between">
+                  <Link href={`/deals/${d.id}`} className="text-brand-600 hover:underline">{d.titre}</Link>
+                  <span className="text-gray-400">{d.montant ? `${d.montant.toLocaleString("fr-FR")} €` : "—"}</span>
+                </li>
+              ))}
+              {e.deals.length === 0 && <li className="text-sm text-gray-400 py-2">Aucun deal</li>}
+            </ul>
+          </div>
+          <div className="card p-5">
+            <h2 className="font-semibold mb-3">📅 Rendez-vous</h2>
+            <ul className="divide-y">
+              {e.meetings.map((m) => (
+                <li key={m.id} className="py-2 text-sm">
+                  <div className="font-medium">{m.titre}</div>
+                  <div className="text-xs text-gray-500">{new Intl.DateTimeFormat("fr-FR", { dateStyle: "medium", timeStyle: "short" }).format(m.dateDebut)}</div>
+                </li>
+              ))}
+              {e.meetings.length === 0 && <li className="text-sm text-gray-400 py-2">Aucun RDV</li>}
+            </ul>
+          </div>
+          <div className="card p-5">
+            <h2 className="font-semibold mb-3">🎫 Tickets</h2>
+            <ul className="divide-y">
+              {e.tickets.map((t) => (
+                <li key={t.id} className="py-2 text-sm flex justify-between">
+                  <Link href={`/tickets/${t.id}`} className="text-brand-600 hover:underline">{t.sujet}</Link>
+                  <span className="text-gray-400">{t.statut}</span>
+                </li>
+              ))}
+              {e.tickets.length === 0 && <li className="text-sm text-gray-400 py-2">Aucun ticket</li>}
+            </ul>
+          </div>
         </div>
       </section>
 

@@ -152,7 +152,40 @@ export default function TopNav() {
           <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" /><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" /></svg>
         </Link>
 
-        <div className="w-9 h-9 rounded-full bg-hubspot-orange flex items-center justify-center text-sm font-semibold ml-2" title="Mon compte">Y</div>
+        <div className="relative ml-2">
+          <button
+            onClick={() => setOpenSection(openSection === "_user" ? null : "_user")}
+            className="w-9 h-9 rounded-full bg-hubspot-orange hover:bg-hubspot-orange-hover flex items-center justify-center text-sm font-semibold"
+            title="Mon compte"
+          >
+            Y
+          </button>
+          {openSection === "_user" && (
+            <div className="absolute top-full right-0 mt-1 bg-white text-hubspot-text rounded-md shadow-hs-dropdown border border-hubspot-border w-72 py-2 z-50">
+              <div className="px-4 py-3 border-b border-hubspot-border">
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 rounded-full bg-hubspot-orange text-white flex items-center justify-center font-bold">Y</div>
+                  <div>
+                    <div className="font-semibold text-sm">Yousra</div>
+                    <div className="text-xs text-hubspot-text-muted">admin@groupe-cfa.fr</div>
+                    <span className="badge bg-purple-50 text-purple-700 mt-1">admin</span>
+                  </div>
+                </div>
+              </div>
+              <Link href="/settings/profil" onClick={() => setOpenSection(null)} className="block px-4 py-2 text-sm hover:bg-hubspot-bg-alt">👤 Mon profil</Link>
+              <Link href="/settings/preferences" onClick={() => setOpenSection(null)} className="block px-4 py-2 text-sm hover:bg-hubspot-bg-alt">🎛️ Mes préférences</Link>
+              <Link href="/settings/notifications" onClick={() => setOpenSection(null)} className="block px-4 py-2 text-sm hover:bg-hubspot-bg-alt">🔔 Notifications</Link>
+              <Link href="/settings/email" onClick={() => setOpenSection(null)} className="block px-4 py-2 text-sm hover:bg-hubspot-bg-alt">✉️ Email & signature</Link>
+              <Link href="/settings/calendrier" onClick={() => setOpenSection(null)} className="block px-4 py-2 text-sm hover:bg-hubspot-bg-alt">📅 Calendrier</Link>
+              <Link href="/settings/securite" onClick={() => setOpenSection(null)} className="block px-4 py-2 text-sm hover:bg-hubspot-bg-alt">🔒 Sécurité & 2FA</Link>
+              <div className="border-t border-hubspot-border my-1" />
+              <Link href="/settings" onClick={() => setOpenSection(null)} className="block px-4 py-2 text-sm hover:bg-hubspot-bg-alt">⚙️ Tous les paramètres</Link>
+              <a href="#" className="block px-4 py-2 text-sm hover:bg-hubspot-bg-alt">❓ Aide & support</a>
+              <div className="border-t border-hubspot-border my-1" />
+              <a href="#" className="block px-4 py-2 text-sm hover:bg-rose-50 text-rose-600">🚪 Se déconnecter</a>
+            </div>
+          )}
+        </div>
       </div>
     </header>
   );

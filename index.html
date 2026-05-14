@@ -65,7 +65,14 @@
     </div>
   </div>
   <div class="hero-img">
-    <img src="https://images.unsplash.com/photo-1635363638580-c2809d049eee?auto=format&fit=crop&w=900&q=80" alt="Poulet frit coréen" onerror="this.style.display='none'"/>
+    <div class="hero-emoji-card">
+      <div class="hero-emoji">🍗</div>
+      <div class="hero-emoji-small e1">🌶️</div>
+      <div class="hero-emoji-small e2">🍜</div>
+      <div class="hero-emoji-small e3">🥟</div>
+      <div class="hero-emoji-small e4">🍧</div>
+      <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/6/68/Korean_fried_chicken_-Yangnyeom-tongdak-01.jpg/800px-Korean_fried_chicken_-Yangnyeom-tongdak-01.jpg" alt="Poulet frit coréen" onload="this.classList.add('loaded')" onerror="this.remove()" referrerpolicy="no-referrer"/>
+    </div>
   </div>
 </section>
 
@@ -113,7 +120,13 @@
       <button class="btn btn-primary" onclick="addCombo()">Ajouter au panier 🛒</button>
     </div>
     <div class="combo-img">
-      <img src="https://images.unsplash.com/photo-1583224964978-2257b960c3d3?auto=format&fit=crop&w=800&q=80" alt="Combo coréen" onerror="this.style.display='none'"/>
+      <div class="combo-fallback">
+        <div class="combo-emoji-grid">
+          <span>🍗</span><span>🍢</span>
+          <span>🥟</span><span>🍧</span>
+        </div>
+      </div>
+      <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/8/8e/Dolsot-bibimbap.jpg/800px-Dolsot-bibimbap.jpg" alt="Combo coréen" onload="this.classList.add('loaded')" onerror="this.remove()" referrerpolicy="no-referrer"/>
     </div>
   </div>
 </section>
@@ -121,7 +134,11 @@
 <!-- À PROPOS -->
 <section id="about" class="about-section">
   <div class="about-img">
-    <img src="https://images.unsplash.com/photo-1604908176997-125f25cc6f3d?auto=format&fit=crop&w=800&q=80" alt="Cuisine coréenne" onerror="this.style.display='none'"/>
+    <div class="about-fallback">
+      <div class="about-emoji">👩‍🍳</div>
+      <div class="about-hangul">맛있다<br/><small>맛있는 한국 요리</small></div>
+    </div>
+    <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/3/3a/Korean_table_setting-Banchan-01.jpg/800px-Korean_table_setting-Banchan-01.jpg" alt="Cuisine coréenne" onload="this.classList.add('loaded')" onerror="this.remove()" referrerpolicy="no-referrer"/>
     <div class="about-floating">
       <div class="num">10+</div>
       <div class="lbl">ans de passion coréenne</div>

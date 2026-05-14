@@ -1,9 +1,12 @@
 // ========== DONNÉES MENU ==========
+// Photos via Wikipedia Commons (URLs canoniques, photos garanties = au plat).
+// Emoji + gradient en fallback CSS si une photo ne charge pas.
 const MENU = [
   // SIGNATURES
   {
     id:'tteokbokki', cat:['signature','rice'], korean:'떡볶이', name:'Tteokbokki Signature', price:9.90,
-    img:'https://images.unsplash.com/photo-1635363638580-c2809d049eee?auto=format&fit=crop&w=600&q=80',
+    img:'https://upload.wikimedia.org/wikipedia/commons/thumb/0/04/Tteok-bokki.jpg/640px-Tteok-bokki.jpg',
+    emoji:'🍢', bg:'linear-gradient(135deg,#FF4D4D,#FF8E53)',
     desc:'L\'icône de Séoul. Gâteaux de riz moelleux mijotés dans une sauce gochujang douce-épicée maison.',
     ingredients:['Gâteaux de riz coréens (garaetteok)','Gochujang maison sans alcool','Sauce soja','Sucre de canne','Ail','Oignon nouveau','Graines de sésame','Bouillon d\'algue dashi (sans poisson)'],
     allergens:['Gluten','Soja','Sésame'],
@@ -12,7 +15,8 @@ const MENU = [
   },
   {
     id:'yangnyeom', cat:['signature','chicken'], korean:'양념치킨', name:'Poulet Yangnyeom', price:13.90,
-    img:'https://images.unsplash.com/photo-1626082927389-6cd097cdc6ec?auto=format&fit=crop&w=600&q=80',
+    img:'https://upload.wikimedia.org/wikipedia/commons/thumb/6/68/Korean_fried_chicken_-Yangnyeom-tongdak-01.jpg/640px-Korean_fried_chicken_-Yangnyeom-tongdak-01.jpg',
+    emoji:'🍗', bg:'linear-gradient(135deg,#E63946,#FFB627)',
     desc:'Poulet halal double frit, ultra croustillant, enrobé d\'une sauce sucrée-épicée légendaire.',
     ingredients:['Poulet halal AVS (cuisse désossée)','Farine de blé + maïzena','Gochujang sans alcool','Miel','Ail','Gingembre','Sauce soja','Vinaigre de riz (sans alcool)','Graines de sésame'],
     allergens:['Gluten','Soja','Sésame'],
@@ -21,7 +25,8 @@ const MENU = [
   },
   {
     id:'corndog', cat:['signature','street'], korean:'감자핫도그', name:'Corn Dog Mozza', price:7.50,
-    img:'https://images.unsplash.com/photo-1619221882266-0a8d6efba61a?auto=format&fit=crop&w=600&q=80',
+    img:'https://upload.wikimedia.org/wikipedia/commons/thumb/b/b7/Gamja-hot-dog.jpg/640px-Gamja-hot-dog.jpg',
+    emoji:'🌭', bg:'linear-gradient(135deg,#FFB627,#FF8E53)',
     desc:'Saucisse de bœuf halal + mozzarella fondante, enrobée d\'une pâte croustillante et de cubes de pomme de terre.',
     ingredients:['Saucisse de bœuf halal','Mozzarella 100%','Farine de blé','Cubes de pomme de terre','Levure boulangère','Sucre','Chapelure panko','Sucre cristal pour saupoudrer'],
     allergens:['Gluten','Lait','Œuf'],
@@ -32,7 +37,8 @@ const MENU = [
   // POULET FRIT
   {
     id:'kfc-original', cat:['chicken'], korean:'후라이드치킨', name:'Poulet Frit Original', price:12.90,
-    img:'https://images.unsplash.com/photo-1562967914-608f82629710?auto=format&fit=crop&w=600&q=80',
+    img:'https://upload.wikimedia.org/wikipedia/commons/thumb/4/4b/Korean.cuisine-Huraideu_chikin-01.jpg/640px-Korean.cuisine-Huraideu_chikin-01.jpg',
+    emoji:'🍗', bg:'linear-gradient(135deg,#C9A227,#FFE066)',
     desc:'Pilons et ailes halal frits 2 fois pour un croustillant inégalé. Servi avec sauce ranch coréenne.',
     ingredients:['Poulet halal AVS','Farine de blé','Maïzena','Sel','Poivre blanc','Paprika doux','Huile de tournesol'],
     allergens:['Gluten'],
@@ -41,7 +47,8 @@ const MENU = [
   },
   {
     id:'kfc-soy-garlic', cat:['chicken'], korean:'간장치킨', name:'Poulet Soja-Ail', price:13.90,
-    img:'https://images.unsplash.com/photo-1610057099443-fde8c4d50f91?auto=format&fit=crop&w=600&q=80',
+    img:'https://upload.wikimedia.org/wikipedia/commons/thumb/3/38/Ganjang-chikin.jpg/640px-Ganjang-chikin.jpg',
+    emoji:'🍗', bg:'linear-gradient(135deg,#5C2E00,#C9A227)',
     desc:'Poulet frit halal glacé d\'une sauce soja-ail sucrée et noix de pin grillées.',
     ingredients:['Poulet halal AVS','Sauce soja','Cassonade','Ail','Gingembre','Pin grillé','Vinaigre de riz sans alcool'],
     allergens:['Gluten','Soja','Fruits à coque'],
@@ -50,7 +57,8 @@ const MENU = [
   },
   {
     id:'kfc-honeybutter', cat:['chicken'], korean:'허니버터치킨', name:'Honey Butter Chicken', price:13.90,
-    img:'https://images.unsplash.com/photo-1606756790138-261d2b21cd75?auto=format&fit=crop&w=600&q=80',
+    img:'https://upload.wikimedia.org/wikipedia/commons/thumb/4/42/Korean_fried_chicken_with_seasoning.jpg/640px-Korean_fried_chicken_with_seasoning.jpg',
+    emoji:'🍗', bg:'linear-gradient(135deg,#FFB627,#FFE066)',
     desc:'Le pêché mignon coréen. Poulet halal croustillant, beurre, miel et soupçon de fromage en poudre.',
     ingredients:['Poulet halal AVS','Beurre doux','Miel','Lait en poudre','Parmesan en poudre','Sel'],
     allergens:['Gluten','Lait'],
@@ -61,7 +69,8 @@ const MENU = [
   // RIZ & NOUILLES
   {
     id:'bibimbap', cat:['rice','signature'], korean:'비빔밥', name:'Bibimbap Bœuf', price:14.50,
-    img:'https://images.unsplash.com/photo-1583224964978-2257b960c3d3?auto=format&fit=crop&w=600&q=80',
+    img:'https://upload.wikimedia.org/wikipedia/commons/thumb/8/8e/Dolsot-bibimbap.jpg/640px-Dolsot-bibimbap.jpg',
+    emoji:'🍱', bg:'linear-gradient(135deg,#06A77D,#E63946)',
     desc:'Bol de riz, légumes croquants, bœuf halal mariné, œuf au plat et sauce gochujang à mélanger.',
     ingredients:['Bœuf halal mariné','Riz japonais','Carottes','Épinards','Pousses de soja','Champignons shiitake','Courgette','Œuf','Gochujang','Huile de sésame'],
     allergens:['Soja','Sésame','Œuf'],
@@ -70,7 +79,8 @@ const MENU = [
   },
   {
     id:'bibimbap-veg', cat:['rice','veggie'], korean:'채식비빔밥', name:'Bibimbap Végé', price:11.90,
-    img:'https://images.unsplash.com/photo-1607330289024-1535c6b4e1c1?auto=format&fit=crop&w=600&q=80',
+    img:'https://upload.wikimedia.org/wikipedia/commons/thumb/8/8a/Bibimbap_in_Jeonju.jpg/640px-Bibimbap_in_Jeonju.jpg',
+    emoji:'🥗', bg:'linear-gradient(135deg,#52B788,#FFD23F)',
     desc:'Version végétarienne tout aussi gourmande. Tofu mariné en remplacement du bœuf.',
     ingredients:['Tofu ferme mariné','Riz japonais','Carottes','Épinards','Pousses de soja','Champignons','Courgette','Œuf','Gochujang','Huile de sésame'],
     allergens:['Soja','Sésame','Œuf'],
@@ -79,7 +89,8 @@ const MENU = [
   },
   {
     id:'bulgogi-bowl', cat:['rice'], korean:'불고기덮밥', name:'Bol Bulgogi', price:13.50,
-    img:'https://images.unsplash.com/photo-1632778149955-e80f8ceca2e8?auto=format&fit=crop&w=600&q=80',
+    img:'https://upload.wikimedia.org/wikipedia/commons/thumb/9/94/Bulgogi.jpg/640px-Bulgogi.jpg',
+    emoji:'🍚', bg:'linear-gradient(135deg,#7B3F00,#C9A227)',
     desc:'Bœuf halal finement tranché mariné dans une sauce soja-poire, sur lit de riz fumant.',
     ingredients:['Bœuf halal','Poire asiatique','Sauce soja','Sucre','Ail','Gingembre','Huile de sésame','Riz japonais','Oignons verts'],
     allergens:['Soja','Sésame'],
@@ -88,7 +99,8 @@ const MENU = [
   },
   {
     id:'kimbap', cat:['rice','street'], korean:'김밥', name:'Kimbap Poulet', price:8.90,
-    img:'https://images.unsplash.com/photo-1635363638580-c2809d049eee?auto=format&fit=crop&w=600&q=80',
+    img:'https://upload.wikimedia.org/wikipedia/commons/thumb/1/10/Korean.food-Gimbap-01.jpg/640px-Korean.food-Gimbap-01.jpg',
+    emoji:'🍙', bg:'linear-gradient(135deg,#1A4D2E,#06A77D)',
     desc:'Le "sushi roll" coréen. Algue nori, riz vinaigré, poulet halal, omelette, légumes croquants.',
     ingredients:['Algue nori','Riz vinaigré','Poulet halal','Œuf','Carotte','Épinards','Concombre','Radis jaune','Huile de sésame'],
     allergens:['Sésame','Œuf','Soja'],
@@ -97,7 +109,8 @@ const MENU = [
   },
   {
     id:'japchae', cat:['rice','veggie'], korean:'잡채', name:'Japchae', price:11.50,
-    img:'https://images.unsplash.com/photo-1569058242253-92a9c755a0ec?auto=format&fit=crop&w=600&q=80',
+    img:'https://upload.wikimedia.org/wikipedia/commons/thumb/c/c0/Korean.food-Japchae-01.jpg/640px-Korean.food-Japchae-01.jpg',
+    emoji:'🍜', bg:'linear-gradient(135deg,#7B3F00,#FFB627)',
     desc:'Nouilles de patate douce sautées aux légumes croquants et huile de sésame.',
     ingredients:['Nouilles de patate douce (dangmyeon)','Épinards','Carottes','Oignon','Champignons shiitake','Poivron','Sauce soja','Huile de sésame','Sucre','Graines de sésame'],
     allergens:['Soja','Sésame'],
@@ -106,7 +119,8 @@ const MENU = [
   },
   {
     id:'ramyeon', cat:['rice'], korean:'라면', name:'Ramyeon Spicy Beef', price:10.90,
-    img:'https://images.unsplash.com/photo-1591814468924-caf88d1232e1?auto=format&fit=crop&w=600&q=80',
+    img:'https://upload.wikimedia.org/wikipedia/commons/thumb/4/41/Korean.food-Shin_Ramyun-01.jpg/640px-Korean.food-Shin_Ramyun-01.jpg',
+    emoji:'🍜', bg:'linear-gradient(135deg,#B5202D,#FF8E53)',
     desc:'Bouillon épicé maison, nouilles ramen, émincé de bœuf halal, œuf mollet et kimchi.',
     ingredients:['Nouilles ramen','Bouillon de bœuf halal','Gochugaru (piment doux)','Bœuf halal émincé','Œuf','Oignon vert','Kimchi','Ail','Pâte de soja doenjang'],
     allergens:['Gluten','Soja','Œuf'],
@@ -117,7 +131,8 @@ const MENU = [
   // STREET SNACKS
   {
     id:'mandu', cat:['street'], korean:'만두', name:'Mandu Poulet (6 pcs)', price:7.90,
-    img:'https://images.unsplash.com/photo-1496116218417-1a781b1c416c?auto=format&fit=crop&w=600&q=80',
+    img:'https://upload.wikimedia.org/wikipedia/commons/thumb/a/ad/Korean_dumpling-Mandu-04.jpg/640px-Korean_dumpling-Mandu-04.jpg',
+    emoji:'🥟', bg:'linear-gradient(135deg,#FFE5B4,#E5B97B)',
     desc:'Raviolis vapeur ou poêlés, farce poulet halal, ciboule et chou.',
     ingredients:['Pâte à raviolis (farine de blé)','Poulet halal haché','Chou','Ciboule','Tofu','Ail','Gingembre','Huile de sésame','Sauce soja'],
     allergens:['Gluten','Soja','Sésame'],
@@ -126,7 +141,8 @@ const MENU = [
   },
   {
     id:'mandu-veg', cat:['street','veggie'], korean:'채식만두', name:'Mandu Légumes (6 pcs)', price:6.90,
-    img:'https://images.unsplash.com/photo-1547928576-b822bc410bdf?auto=format&fit=crop&w=600&q=80',
+    img:'https://upload.wikimedia.org/wikipedia/commons/thumb/3/3c/Korean_dumpling-Mandu-01.jpg/640px-Korean_dumpling-Mandu-01.jpg',
+    emoji:'🥟', bg:'linear-gradient(135deg,#9BC53D,#52B788)',
     desc:'Raviolis 100% légumes : chou, vermicelles, tofu, champignons.',
     ingredients:['Pâte à raviolis','Chou','Tofu','Vermicelles','Champignons','Ciboule','Carottes','Ail','Huile de sésame'],
     allergens:['Gluten','Soja','Sésame'],
@@ -135,7 +151,8 @@ const MENU = [
   },
   {
     id:'eomuk', cat:['street'], korean:'어묵', name:'Eomuk (Brochette de poisson)', price:5.90,
-    img:'https://images.unsplash.com/photo-1568901346375-23c9450c58cd?auto=format&fit=crop&w=600&q=80',
+    img:'https://upload.wikimedia.org/wikipedia/commons/thumb/c/c2/Korean.food-Eomuk-01.jpg/640px-Korean.food-Eomuk-01.jpg',
+    emoji:'🍢', bg:'linear-gradient(135deg,#A7C7E7,#F5DEB3)',
     desc:'Brochettes de galettes de poisson dans un bouillon clair, un classique des marchés de nuit.',
     ingredients:['Galette de poisson blanc','Farine de blé','Carotte','Oignon','Bouillon de radis daikon','Algue kombu','Sauce soja'],
     allergens:['Gluten','Poisson','Soja'],
@@ -144,7 +161,8 @@ const MENU = [
   },
   {
     id:'twigim', cat:['street','veggie'], korean:'튀김', name:'Twigim Mixte', price:6.50,
-    img:'https://images.unsplash.com/photo-1625938145744-e380515399b7?auto=format&fit=crop&w=600&q=80',
+    img:'https://upload.wikimedia.org/wikipedia/commons/thumb/0/02/Korean.cuisine-Twigim-01.jpg/640px-Korean.cuisine-Twigim-01.jpg',
+    emoji:'🍤', bg:'linear-gradient(135deg,#FFD23F,#FFB627)',
     desc:'Assortiment de tempura à la coréenne : patate douce, algue gimmari, beignet aux légumes.',
     ingredients:['Patate douce','Algue nori','Vermicelles','Carotte','Oignon','Farine de blé','Maïzena','Sel'],
     allergens:['Gluten'],
@@ -153,7 +171,8 @@ const MENU = [
   },
   {
     id:'kimchi-fries', cat:['street'], korean:'김치감자튀김', name:'Kimchi Fries', price:7.90,
-    img:'https://images.unsplash.com/photo-1576107232684-1279f390859f?auto=format&fit=crop&w=600&q=80',
+    img:'https://upload.wikimedia.org/wikipedia/commons/thumb/9/9a/Korean.cuisine-Kimchi-01.jpg/640px-Korean.cuisine-Kimchi-01.jpg',
+    emoji:'🍟', bg:'linear-gradient(135deg,#E63946,#FFB627)',
     desc:'Frites maison, kimchi sauté, fromage fondu, sauce mayo épicée et oignons verts.',
     ingredients:['Pomme de terre','Kimchi','Fromage cheddar','Mayonnaise','Sriracha','Ciboule','Sel'],
     allergens:['Lait','Œuf','Soja'],
@@ -164,7 +183,8 @@ const MENU = [
   // SUCRÉ
   {
     id:'bingsu-strawberry', cat:['sweet'], korean:'딸기빙수', name:'Bingsu Fraise', price:9.90,
-    img:'https://images.unsplash.com/photo-1551024601-bec78aea704b?auto=format&fit=crop&w=600&q=80',
+    img:'https://upload.wikimedia.org/wikipedia/commons/thumb/0/04/Korean.dessert-Patbingsu-04.jpg/640px-Korean.dessert-Patbingsu-04.jpg',
+    emoji:'🍧', bg:'linear-gradient(135deg,#FFB6C1,#FF69B4)',
     desc:'Glace pilée crémeuse au lait, montagne de fraises fraîches, lait concentré et mochi.',
     ingredients:['Glace au lait','Fraises fraîches','Lait concentré sucré','Mochi','Crème fouettée','Coulis de fraise'],
     allergens:['Lait','Gluten'],
@@ -173,7 +193,8 @@ const MENU = [
   },
   {
     id:'bingsu-mango', cat:['sweet'], korean:'망고빙수', name:'Bingsu Mangue', price:9.90,
-    img:'https://images.unsplash.com/photo-1488477181946-6428a0291777?auto=format&fit=crop&w=600&q=80',
+    img:'https://upload.wikimedia.org/wikipedia/commons/thumb/7/75/Korean.dessert-Patbingsu-01.jpg/640px-Korean.dessert-Patbingsu-01.jpg',
+    emoji:'🥭', bg:'linear-gradient(135deg,#FFD23F,#FF8E53)',
     desc:'Glace au lait, dés de mangue Alphonso, coulis tropical et lait concentré.',
     ingredients:['Glace au lait','Mangue','Lait concentré','Mochi','Coulis de mangue'],
     allergens:['Lait','Gluten'],
@@ -182,7 +203,8 @@ const MENU = [
   },
   {
     id:'hotteok', cat:['sweet','street'], korean:'호떡', name:'Hotteok (2 pcs)', price:5.90,
-    img:'https://images.unsplash.com/photo-1606471191009-63994c53433b?auto=format&fit=crop&w=600&q=80',
+    img:'https://upload.wikimedia.org/wikipedia/commons/thumb/0/01/Korean_pancake-Hotteok-01.jpg/640px-Korean_pancake-Hotteok-01.jpg',
+    emoji:'🥞', bg:'linear-gradient(135deg,#C9A227,#7B3F00)',
     desc:'Crêpe coréenne dorée à la poêle, cœur fondant de cannelle, cassonade et noix.',
     ingredients:['Farine de blé','Levure','Cassonade','Cannelle','Noix','Cacahuètes','Lait','Sucre'],
     allergens:['Gluten','Lait','Fruits à coque','Arachides'],
@@ -191,7 +213,8 @@ const MENU = [
   },
   {
     id:'dalgona', cat:['sweet','drinks'], korean:'달고나커피', name:'Dalgona Coffee', price:5.50,
-    img:'https://images.unsplash.com/photo-1586195831824-3f4cef91da40?auto=format&fit=crop&w=600&q=80',
+    img:'https://upload.wikimedia.org/wikipedia/commons/thumb/3/35/Dalgona_coffee.jpg/640px-Dalgona_coffee.jpg',
+    emoji:'☕', bg:'linear-gradient(135deg,#3E2723,#C9A227)',
     desc:'Le café viral coréen. Lait frais surmonté d\'une mousse de café fouettée crémeuse.',
     ingredients:['Café soluble','Sucre','Eau chaude','Lait frais','Glace'],
     allergens:['Lait'],
@@ -202,7 +225,8 @@ const MENU = [
   // BOISSONS
   {
     id:'sikhye', cat:['drinks'], korean:'식혜', name:'Sikhye (boisson riz)', price:3.90,
-    img:'https://images.unsplash.com/photo-1606755456206-b25206cde27e?auto=format&fit=crop&w=600&q=80',
+    img:'https://upload.wikimedia.org/wikipedia/commons/thumb/4/47/Korean.drink-Sikhye-02.jpg/640px-Korean.drink-Sikhye-02.jpg',
+    emoji:'🥤', bg:'linear-gradient(135deg,#F5DEB3,#E5B97B)',
     desc:'Boisson traditionnelle sucrée et désaltérante à base de riz fermenté (sans alcool).',
     ingredients:['Riz','Malt d\'orge','Sucre','Gingembre','Eau'],
     allergens:['Gluten'],
@@ -211,7 +235,8 @@ const MENU = [
   },
   {
     id:'yuja-tea', cat:['drinks'], korean:'유자차', name:'Thé au Yuzu', price:4.50,
-    img:'https://images.unsplash.com/photo-1567922045116-2a00fae2ed03?auto=format&fit=crop&w=600&q=80',
+    img:'https://upload.wikimedia.org/wikipedia/commons/thumb/2/25/Korean.tea-Yujacha-01.jpg/640px-Korean.tea-Yujacha-01.jpg',
+    emoji:'🍵', bg:'linear-gradient(135deg,#FFD23F,#FFE066)',
     desc:'Marmelade artisanale de yuzu (agrume coréen) infusée à l\'eau chaude. Chaud ou glacé.',
     ingredients:['Yuzu','Sucre','Miel','Eau'],
     allergens:[],
@@ -220,7 +245,8 @@ const MENU = [
   },
   {
     id:'aloe', cat:['drinks'], korean:'알로에음료', name:'Aloe Vera', price:3.50,
-    img:'https://images.unsplash.com/photo-1556881286-fc6915169721?auto=format&fit=crop&w=600&q=80',
+    img:'https://upload.wikimedia.org/wikipedia/commons/thumb/2/23/Aloe_vera_drink.jpg/640px-Aloe_vera_drink.jpg',
+    emoji:'🥤', bg:'linear-gradient(135deg,#9BC53D,#52B788)',
     desc:'Boisson rafraîchissante aux pulpes d\'aloe vera.',
     ingredients:['Pulpe d\'aloe vera','Eau','Sucre','Acide citrique'],
     allergens:[],
@@ -229,7 +255,8 @@ const MENU = [
   },
   {
     id:'soda-melon', cat:['drinks'], korean:'멜론소다', name:'Melon Soda', price:3.90,
-    img:'https://images.unsplash.com/photo-1623065422902-30a2d299bbe4?auto=format&fit=crop&w=600&q=80',
+    img:'https://upload.wikimedia.org/wikipedia/commons/thumb/2/2f/Melon_soda.jpg/640px-Melon_soda.jpg',
+    emoji:'🥤', bg:'linear-gradient(135deg,#9BC53D,#FFE066)',
     desc:'Soda pétillant au melon coréen, ultra frais et fruité.',
     ingredients:['Eau gazeuse','Sirop de melon','Sucre'],
     allergens:[],
@@ -244,7 +271,7 @@ const STATE = {
   favorites: JSON.parse(localStorage.getItem('nuna_favs')||'[]'),
   filter: 'all',
   search: '',
-  promo: null, // {code, percent}
+  promo: null,
   mode: 'delivery'
 };
 
@@ -270,6 +297,15 @@ function toast(msg){
 function persist(){
   localStorage.setItem('nuna_cart', JSON.stringify(STATE.cart));
   localStorage.setItem('nuna_favs', JSON.stringify(STATE.favorites));
+}
+
+// Build dish image cell: gradient bg + emoji fallback ALWAYS visible behind, photo on top
+function imgCell(d, clickable=true){
+  const click = clickable ? `onclick="openProduct('${d.id}')"` : '';
+  return `<div class="dish-img" style="background:${d.bg}" ${click}>
+    <div class="dish-emoji">${d.emoji}</div>
+    <img src="${d.img}" alt="${d.name}" loading="lazy" onload="this.classList.add('loaded')" onerror="this.remove()" referrerpolicy="no-referrer"/>
+  </div>`;
 }
 
 // ========== RENDU MENU ==========
@@ -301,11 +337,9 @@ function renderMenu(){
     }).join('');
     return `
       <article class="dish" data-id="${d.id}">
-        <div class="dish-img" onclick="openProduct('${d.id}')">
-          <img src="${d.img}" alt="${d.name}" loading="lazy" onerror="this.style.display='none'"/>
-          <div class="dish-badges">${badges}</div>
-          <button class="dish-fav ${isFav?'active':''}" onclick="event.stopPropagation();toggleFav('${d.id}')" aria-label="Favoris">${isFav?'❤️':'🤍'}</button>
-        </div>
+        ${imgCell(d, true)}
+        <div class="dish-badges">${badges}</div>
+        <button class="dish-fav ${isFav?'active':''}" onclick="event.stopPropagation();toggleFav('${d.id}')" aria-label="Favoris">${isFav?'❤️':'🤍'}</button>
         <div class="dish-body">
           <div class="dish-korean">${d.korean}</div>
           <h3 class="dish-name">${d.name}</h3>
@@ -335,9 +369,12 @@ function toggleFav(id){
 }
 
 // ========== MODAL PRODUIT ==========
+let pmQuantity = 1;
 function openProduct(id){
   const d = MENU.find(m=>m.id===id);
   if(!d) return;
+  pmQuantity = 1;
+  window._currentPid = id;
   const modal = $('#productModal');
   const spiceLevels = d.spice ? `
     <div class="pm-section">
@@ -361,8 +398,9 @@ function openProduct(id){
     </div>`;
 
   $('#productDetails').innerHTML = `
-    <div class="pm-img">
-      <img src="${d.img}" alt="${d.name}" onerror="this.parentElement.innerHTML='<div style=\\'display:flex;align-items:center;justify-content:center;height:100%;font-size:5rem\\'>🍜</div>'"/>
+    <div class="pm-img" style="background:${d.bg}">
+      <div class="dish-emoji">${d.emoji}</div>
+      <img src="${d.img}" alt="${d.name}" onload="this.classList.add('loaded')" onerror="this.remove()" referrerpolicy="no-referrer"/>
     </div>
     <div class="pm-body">
       <div class="dish-korean">${d.korean}</div>
@@ -399,7 +437,6 @@ function openProduct(id){
     </div>
   `;
 
-  // Listeners options
   modal.classList.add('open');
   $$('#sizeOpts .option-pill').forEach(b=>{
     b.onclick = ()=>{
@@ -417,29 +454,17 @@ function openProduct(id){
     });
   }
 }
-let pmQuantity = 1;
 function pmQty(delta){
   pmQuantity = Math.max(1, Math.min(20, pmQuantity+delta));
   $('#pmQty').textContent = pmQuantity;
-  const d = MENU.find(m=>m.id===currentProductId());
+  const d = MENU.find(m=>m.id===window._currentPid);
   if(d) updatePmTotal(d);
-}
-function currentProductId(){
-  // We grab from the rendered title — simpler: store
-  return window._currentPid;
 }
 function updatePmTotal(d){
   const size = +($('#sizeOpts .option-pill.selected')?.dataset.size || 0);
   const total = (d.price + size) * pmQuantity;
   $('#pmTotal').textContent = fmt(total);
 }
-// Override openProduct to remember id
-const _openProduct = openProduct;
-openProduct = function(id){
-  pmQuantity = 1;
-  window._currentPid = id;
-  _openProduct(id);
-};
 
 function addFromModal(id){
   const d = MENU.find(m=>m.id===id);
@@ -459,14 +484,13 @@ function addToCart(d, qty=1, sizeAdd=0, sizeName='Standard', spice=null, notes='
   if(existing){ existing.qty += qty; }
   else {
     STATE.cart.push({
-      sig, id:d.id, name:d.name, korean:d.korean, img:d.img,
+      sig, id:d.id, name:d.name, korean:d.korean, img:d.img, emoji:d.emoji, bg:d.bg,
       price:d.price+sizeAdd, basePrice:d.price, sizeAdd, sizeName, spice, notes, qty
     });
   }
   persist();
   renderCart();
   toast(`${qty}× ${d.name} ajouté 🍱`);
-  // Pulse cart btn
   $('#cartBtn').animate([{transform:'scale(1)'},{transform:'scale(1.15)'},{transform:'scale(1)'}], 400);
 }
 
@@ -486,7 +510,7 @@ function changeQty(sig, delta){
 function addCombo(){
   STATE.cart.push({
     sig:'combo-'+Date.now(), id:'combo', name:'Combo Séoul Night (4 pers.)', korean:'서울나잇',
-    img:'https://images.unsplash.com/photo-1583224964978-2257b960c3d3?auto=format&fit=crop&w=400&q=80',
+    img:'', emoji:'🎉', bg:'linear-gradient(135deg,#E63946,#FFD23F)',
     price:49.90, basePrice:49.90, sizeAdd:0, sizeName:'Famille', qty:1, notes:''
   });
   persist();
@@ -496,7 +520,6 @@ function addCombo(){
 }
 
 function renderCart(){
-  // Items
   const items = $('#cartItems');
   if(STATE.cart.length===0){
     items.innerHTML = `<div class="empty-cart">
@@ -506,7 +529,10 @@ function renderCart(){
   } else {
     items.innerHTML = STATE.cart.map(c=>`
       <div class="cart-item">
-        <img src="${c.img}" alt="${c.name}" onerror="this.style.background='var(--pink-soft)';this.src=''"/>
+        <div class="cart-thumb" style="background:${c.bg||'var(--pink-soft)'}">
+          <span>${c.emoji||'🍱'}</span>
+          ${c.img?`<img src="${c.img}" alt="" onload="this.classList.add('loaded')" onerror="this.remove()" referrerpolicy="no-referrer"/>`:''}
+        </div>
         <div class="cart-item-info">
           <h4>${c.name}</h4>
           <small>${c.sizeName}${c.spice?' · '+c.spice:''}${c.notes?' · '+c.notes:''}</small>
@@ -524,7 +550,6 @@ function renderCart(){
     `).join('');
   }
 
-  // Totals
   const subtotal = STATE.cart.reduce((s,c)=>s+c.price*c.qty,0);
   let discount = 0;
   if(STATE.promo) discount = subtotal * STATE.promo.percent / 100;
@@ -541,7 +566,6 @@ function renderCart(){
     $('#discountRow').style.display='none';
   }
 
-  // Navbar
   const count = STATE.cart.reduce((s,c)=>s+c.qty,0);
   $('#cartCount').textContent = count;
   $('#cartTotalNav').textContent = fmt(total);
@@ -615,7 +639,6 @@ function placeOrder(e){
   closeModal('checkoutModal');
   $('#successModal').classList.add('open');
 
-  // Reset
   STATE.cart = [];
   STATE.promo = null;
   persist();
@@ -638,13 +661,11 @@ function init(){
   renderMenu();
   renderCart();
 
-  // Search
   $('#searchInput').addEventListener('input', e=>{
     STATE.search = e.target.value.toLowerCase();
     renderMenu();
   });
 
-  // Filters
   $$('.filter').forEach(b=>{
     b.onclick = ()=>{
       $$('.filter').forEach(x=>x.classList.remove('active'));
@@ -654,28 +675,22 @@ function init(){
     };
   });
 
-  // Cart
   $('#cartBtn').onclick = toggleCart;
-
-  // Burger
   $('#burger').onclick = ()=> $('.nav-links').classList.toggle('mobile-open');
   $$('.nav-links a').forEach(a=>a.onclick=()=>$('.nav-links').classList.remove('mobile-open'));
 
-  // To top
   const toTop = $('#toTop');
   window.addEventListener('scroll', ()=>{
     toTop.classList.toggle('show', window.scrollY>500);
   });
   toTop.onclick = ()=>window.scrollTo({top:0,behavior:'smooth'});
 
-  // Close modals on backdrop
   $$('.modal').forEach(m=>{
     m.addEventListener('click', e=>{
       if(e.target===m) m.classList.remove('open');
     });
   });
 
-  // Escape
   document.addEventListener('keydown', e=>{
     if(e.key==='Escape'){
       $$('.modal.open').forEach(m=>m.classList.remove('open'));

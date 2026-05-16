@@ -162,14 +162,8 @@
       "labelPlural": "Apprenants",
       "description": "Personne en formation. Cycle de vie distinct de Person (qui reste pour les contacts B2B).",
       "icon": "IconUserCircle",
-      "labelIdentifier": "nomComplet",
+      "labelIdentifier": "name",
       "fields": [
-        {
-          "name": "nomComplet",
-          "label": "Nom complet",
-          "type": "TEXT",
-          "isNullable": false
-        },
         {
           "name": "prenom",
           "label": "Prénom",

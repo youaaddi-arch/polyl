@@ -162,17 +162,13 @@
       "labelPlural": "Apprenants",
       "description": "Personne en formation. Cycle de vie distinct de Person (qui reste pour les contacts B2B).",
       "icon": "IconUserCircle",
-      "labelIdentifier": "name",
+      "labelIdentifier": "fullName",
       "fields": [
         {
-          "name": "prenom",
-          "label": "Prénom",
-          "type": "TEXT"
-        },
-        {
-          "name": "nom",
-          "label": "Nom",
-          "type": "TEXT"
+          "name": "fullName",
+          "label": "Nom complet",
+          "type": "FULL_NAME",
+          "description": "Composite Prénom + Nom (sous-champs firstName/lastName), comme Person natif."
         },
         {
           "name": "email",

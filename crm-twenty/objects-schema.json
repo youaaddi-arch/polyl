@@ -373,7 +373,7 @@
             },
             {
               "value": "FINANCEMENT_VALIDE_CONVENTION_SIGNEE",
-              "label": "Financement validé, convention signée",
+              "label": "Financement validé — convention signée",
               "color": "turquoise",
               "position": 9
             },
@@ -434,7 +434,7 @@
             },
             {
               "value": "FORMATION_TERMINEE_ATTESTATION_ENVOYEE",
-              "label": "Formation terminée, attestation envoyée",
+              "label": "Formation terminée — attestation envoyée",
               "color": "orange",
               "position": 6
             },
@@ -597,7 +597,7 @@
           "isNullable": false
         },
         {
-          "name": "type",
+          "name": "typeContrat",
           "label": "Type",
           "type": "SELECT",
           "options": [
@@ -716,7 +716,7 @@
           "isNullable": false
         },
         {
-          "name": "type",
+          "name": "typeFinancement",
           "label": "Type",
           "type": "SELECT",
           "options": [
@@ -837,7 +837,7 @@
           "isNullable": false
         },
         {
-          "name": "type",
+          "name": "typeDocument",
           "label": "Type document",
           "type": "TEXT",
           "_todo_j3": "Convertir en SELECT avec 21 valeurs Qualiopi (convention, devis, fiche besoin, attestation assiduité, livret apprentissage, etc.)"
@@ -975,7 +975,7 @@
     "person": {
       "fields": [
         {
-          "name": "roles",
+          "name": "rolesPng",
           "label": "Rôles",
           "type": "MULTI_SELECT",
           "description": "Un contact peut cumuler plusieurs rôles (D7).",

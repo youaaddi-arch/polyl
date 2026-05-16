@@ -82,11 +82,24 @@ async function fetchObjects(): Promise<Map<string, ObjectMeta>> {
   return map;
 }
 
-async function fetchFieldsByObject(objectId: string): Promise<Set<string>> {
-  const res = (await twenty.metadata.get(`/fields?filter=objectMetadataId[eq]:${objectId}`)) as {
-    data?: FieldMeta[];
-  };
-  return new Set((res.data ?? []).map((f) => f.name));
+async function fetchAllFields(): Promise<Map<string, Set<string>>> {
+  const byObject = new Map<string, Set<string>>();
+  let cursor: string | undefined;
+  for (;;) {
+    const qs = new URLSearchParams({ limit: "60" });
+    if (cursor) qs.set("starting_after", cursor);
+    const res = (await twenty.metadata.get(`/fields?${qs.toString()}`)) as {
+      data?: FieldMeta[];
+      pageInfo?: { hasNextPage?: boolean; endCursor?: string };
+    };
+    for (const f of res.data ?? []) {
+      if (!byObject.has(f.objectMetadataId)) byObject.set(f.objectMetadataId, new Set());
+      byObject.get(f.objectMetadataId)!.add(f.name);
+    }
+    if (!res.pageInfo?.hasNextPage || !res.pageInfo.endCursor) break;
+    cursor = res.pageInfo.endCursor;
+  }
+  return byObject;
 }
 
 type Op =
@@ -123,7 +136,9 @@ function buildFieldPayload(objectId: string, f: FieldSpec): Record<string, unkno
   };
   if (f.description) base.description = f.description;
   if (f.isNullable === false) base.isNullable = false;
-  if (f.options) base.options = f.options;
+  if (f.options) {
+    base.options = f.options.map((o, i) => ({ ...o, position: o.position ?? i }));
+  }
   if (f.defaultValue !== undefined) {
     if (f.type === "SELECT" && typeof f.defaultValue === "string") {
       base.defaultValue = `'${f.defaultValue}'`;
@@ -159,6 +174,7 @@ function buildRelationPayload(
 async function plan(schema: Schema, flags: Flags): Promise<Op[]> {
   const ops: Op[] = [];
   const existingObjects = await fetchObjects();
+  const fieldsByObject = await fetchAllFields();
   const planned = new Map<string, { id?: string; key: string }>(); // schema key → meta
 
   // Phase 1: objects
@@ -193,7 +209,7 @@ async function plan(schema: Schema, flags: Flags): Promise<Op[]> {
   // newly-created ones we'll resolve at execute time. In dry-run we just log the intent.
   for (const [key, spec] of Object.entries(schema.objects)) {
     const objMeta = planned.get(key);
-    const existingFieldNames = objMeta?.id ? await fetchFieldsByObject(objMeta.id) : new Set<string>();
+    const existingFieldNames = objMeta?.id ? (fieldsByObject.get(objMeta.id) ?? new Set<string>()) : new Set<string>();
     for (const f of spec.fields) {
       if (existingFieldNames.has(f.name)) {
         ops.push({ kind: "skip", reason: `field '${key}.${f.name}' already exists` });
@@ -226,7 +242,7 @@ async function plan(schema: Schema, flags: Flags): Promise<Op[]> {
   for (const [native, ext] of Object.entries(schema.nativeExtensions)) {
     const objMeta = planned.get(native);
     if (!objMeta?.id) continue;
-    const existingFieldNames = await fetchFieldsByObject(objMeta.id);
+    const existingFieldNames = fieldsByObject.get(objMeta.id) ?? new Set<string>();
     for (const f of ext.fields) {
       if (existingFieldNames.has(f.name)) {
         ops.push({ kind: "skip", reason: `field '${native}.${f.name}' already exists` });

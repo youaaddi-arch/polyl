@@ -1,11 +1,20 @@
 {
   "$schema": "./docs/schema.meta.json",
-  "version": "0.2.0",
+  "version": "0.3.0",
   "workspace": "parisnordgroupe.twenty.com",
   "_notes": {
-    "scope": "J2 MVP — clés, relations, dates. Champs Qualiopi exhaustifs reportés à J3/S2.",
-    "fieldTypes": "TEXT, NUMBER, DATE_TIME, BOOLEAN, EMAILS, PHONES, SELECT, MULTI_SELECT, RELATION",
-    "relations": "Toutes les FK pointent vers d'autres custom objects sauf Person/Company qui sont natifs."
+    "scope": "J2 MVP — clés, relations, dates + CDC Marketing v3 (UTM, attribution, segmentation).",
+    "fieldTypes": "TEXT, NUMBER, BOOLEAN, DATE_TIME, EMAILS, PHONES, SELECT, MULTI_SELECT, RELATION",
+    "relations": "Toutes les FK pointent vers d'autres custom objects sauf Person/Company qui sont natifs.",
+    "outOfScopeJ2": [
+      "GTM injection (côté formulaire candidature — pas applicable au CRM)",
+      "Webhooks Make → Brevo (workflows Twenty, fait en S2)",
+      "Export quotidien Google Sheets (S2)",
+      "Calculs automatiques (age, departement, region, scoreQualite, nbContratsSignes) — workflows Twenty, J3",
+      "Filtres dans vues pipeline (UI Twenty, fait manuellement)",
+      "Documents Qualiopi tests/bilans (gérés dans un autre outil par décision Yousra)",
+      "formationsCompatibles entreprise→formations (relation M2M, J3)"
+    ]
   },
   "entites": [
     {
@@ -452,6 +461,194 @@
           "type": "RELATION",
           "relatedObject": "entite",
           "relatedLabel": "Apprenants"
+        },
+        {
+          "name": "utmSource",
+          "label": "UTM source",
+          "type": "TEXT",
+          "description": "Plateforme d'origine (google, facebook, linkedin)"
+        },
+        {
+          "name": "utmMedium",
+          "label": "UTM medium",
+          "type": "TEXT",
+          "description": "Type de canal (cpc, organic, referral, email)"
+        },
+        {
+          "name": "utmCampaign",
+          "label": "UTM campaign",
+          "type": "TEXT",
+          "description": "Nom de la campagne"
+        },
+        {
+          "name": "canalSource",
+          "label": "Canal source",
+          "type": "SELECT",
+          "description": "Étiquette lisible de la source d'acquisition. Direct par défaut si pas d'UTM.",
+          "options": [
+            {
+              "value": "GOOGLE_ADS",
+              "label": "Google Ads",
+              "color": "blue"
+            },
+            {
+              "value": "META_ADS",
+              "label": "Meta Ads",
+              "color": "sky"
+            },
+            {
+              "value": "LINKEDIN",
+              "label": "LinkedIn",
+              "color": "purple"
+            },
+            {
+              "value": "ORGANIQUE",
+              "label": "Organique",
+              "color": "green"
+            },
+            {
+              "value": "PRESCRIPTION",
+              "label": "Prescription",
+              "color": "yellow"
+            },
+            {
+              "value": "DIRECT",
+              "label": "Direct",
+              "color": "gray"
+            }
+          ],
+          "defaultValue": "DIRECT"
+        },
+        {
+          "name": "rentreeVisee",
+          "label": "Rentrée visée",
+          "type": "SELECT",
+          "options": [
+            {
+              "value": "SEPT_2026",
+              "label": "Septembre 2026",
+              "color": "blue"
+            },
+            {
+              "value": "JAN_2027",
+              "label": "Janvier 2027",
+              "color": "purple"
+            },
+            {
+              "value": "SEPT_2027",
+              "label": "Septembre 2027",
+              "color": "green"
+            }
+          ]
+        },
+        {
+          "name": "age",
+          "label": "Âge",
+          "type": "NUMBER",
+          "description": "Calculé depuis dateNaissance (workflow S2)"
+        },
+        {
+          "name": "ville",
+          "label": "Ville",
+          "type": "TEXT"
+        },
+        {
+          "name": "codePostal",
+          "label": "Code postal",
+          "type": "TEXT"
+        },
+        {
+          "name": "departement",
+          "label": "Département",
+          "type": "TEXT",
+          "description": "Calculé depuis codePostal (workflow S2)"
+        },
+        {
+          "name": "region",
+          "label": "Région",
+          "type": "TEXT",
+          "description": "Calculée depuis codePostal (workflow S2)"
+        },
+        {
+          "name": "mobiliteKm",
+          "label": "Mobilité (km)",
+          "type": "NUMBER"
+        },
+        {
+          "name": "linkedinUrl",
+          "label": "Profil LinkedIn",
+          "type": "TEXT"
+        },
+        {
+          "name": "formationVisee",
+          "label": "Formation visée",
+          "type": "SELECT",
+          "description": "Niveau de diplôme souhaité",
+          "options": [
+            {
+              "value": "BTS",
+              "label": "BTS",
+              "color": "blue"
+            },
+            {
+              "value": "BUT",
+              "label": "BUT",
+              "color": "sky"
+            },
+            {
+              "value": "BACHELOR",
+              "label": "Bachelor",
+              "color": "purple"
+            },
+            {
+              "value": "LICENCE_PRO",
+              "label": "Licence Pro",
+              "color": "pink"
+            },
+            {
+              "value": "MASTER",
+              "label": "Master",
+              "color": "green"
+            }
+          ]
+        },
+        {
+          "name": "secteurVise",
+          "label": "Secteur visé",
+          "type": "SELECT",
+          "options": [
+            {
+              "value": "COMMERCE",
+              "label": "Commerce",
+              "color": "blue"
+            },
+            {
+              "value": "INFORMATIQUE",
+              "label": "Informatique",
+              "color": "sky"
+            },
+            {
+              "value": "RH",
+              "label": "RH",
+              "color": "purple"
+            },
+            {
+              "value": "FINANCE",
+              "label": "Finance",
+              "color": "pink"
+            },
+            {
+              "value": "MARKETING",
+              "label": "Marketing",
+              "color": "orange"
+            }
+          ]
+        },
+        {
+          "name": "scoreQualite",
+          "label": "Score qualité (1-5)",
+          "type": "NUMBER",
+          "description": "Calculé à la création (workflow S2). Pilotage marketing uniquement."
         }
       ]
     },
@@ -1006,6 +1203,74 @@
               "color": "green"
             }
           ]
+        },
+        {
+          "name": "contactPrincipal",
+          "label": "Contact principal",
+          "type": "BOOLEAN",
+          "description": "Un seul contact principal par entreprise (règle métier, pas contrainte DB).",
+          "defaultValue": false
+        },
+        {
+          "name": "sourceContact",
+          "label": "Source contact",
+          "type": "SELECT",
+          "description": "Comment le contact a été trouvé.",
+          "options": [
+            {
+              "value": "HUNTER_IO",
+              "label": "Hunter.io",
+              "color": "blue"
+            },
+            {
+              "value": "LINKEDIN",
+              "label": "LinkedIn",
+              "color": "purple"
+            },
+            {
+              "value": "SITE_WEB",
+              "label": "Site web",
+              "color": "sky"
+            },
+            {
+              "value": "APPEL_ENTRANT",
+              "label": "Appel entrant",
+              "color": "green"
+            },
+            {
+              "value": "RECOMMANDATION",
+              "label": "Recommandation",
+              "color": "yellow"
+            }
+          ]
+        },
+        {
+          "name": "statutContact",
+          "label": "Statut contact",
+          "type": "SELECT",
+          "options": [
+            {
+              "value": "A_CONTACTER",
+              "label": "À contacter",
+              "color": "gray"
+            },
+            {
+              "value": "CONTACTE",
+              "label": "Contacté",
+              "color": "yellow"
+            },
+            {
+              "value": "REPONDU",
+              "label": "Répondu",
+              "color": "green"
+            },
+            {
+              "value": "INJOIGNABLE",
+              "label": "Injoignable",
+              "color": "red"
+            }
+          ],
+          "defaultValue": "A_CONTACTER"
         }
       ]
     },
@@ -1038,6 +1303,169 @@
               "color": "yellow"
             }
           ]
+        },
+        {
+          "name": "secteurActivite",
+          "label": "Secteur d'activité",
+          "type": "SELECT",
+          "options": [
+            {
+              "value": "COMMERCE",
+              "label": "Commerce",
+              "color": "blue"
+            },
+            {
+              "value": "TECH",
+              "label": "Tech",
+              "color": "sky"
+            },
+            {
+              "value": "FINANCE",
+              "label": "Finance",
+              "color": "purple"
+            },
+            {
+              "value": "RH",
+              "label": "RH",
+              "color": "pink"
+            },
+            {
+              "value": "MARKETING",
+              "label": "Marketing",
+              "color": "orange"
+            },
+            {
+              "value": "BTP",
+              "label": "BTP",
+              "color": "yellow"
+            },
+            {
+              "value": "SANTE",
+              "label": "Santé",
+              "color": "red"
+            },
+            {
+              "value": "EDUCATION",
+              "label": "Éducation",
+              "color": "green"
+            },
+            {
+              "value": "AUTRE",
+              "label": "Autre",
+              "color": "gray"
+            }
+          ]
+        },
+        {
+          "name": "tailleEntreprise",
+          "label": "Taille",
+          "type": "SELECT",
+          "options": [
+            {
+              "value": "TPE",
+              "label": "TPE (< 10)",
+              "color": "gray"
+            },
+            {
+              "value": "PME",
+              "label": "PME (10-250)",
+              "color": "blue"
+            },
+            {
+              "value": "ETI",
+              "label": "ETI (250-5000)",
+              "color": "purple"
+            },
+            {
+              "value": "GRAND_COMPTE",
+              "label": "Grand compte (> 5000)",
+              "color": "green"
+            }
+          ]
+        },
+        {
+          "name": "siteWeb",
+          "label": "Site web",
+          "type": "TEXT",
+          "description": "URL complète. company.domainName natif ne stocke que le domaine."
+        },
+        {
+          "name": "sourceEntreprise",
+          "label": "Source entreprise",
+          "type": "SELECT",
+          "description": "Comment l'entreprise a été identifiée.",
+          "options": [
+            {
+              "value": "SCRAPING_INDEED",
+              "label": "Scraping Indeed",
+              "color": "blue"
+            },
+            {
+              "value": "SCRAPING_HELLOWORK",
+              "label": "Scraping Hellowork",
+              "color": "sky"
+            },
+            {
+              "value": "API_LA_BONNE_ALTERNANCE",
+              "label": "API La Bonne Alternance",
+              "color": "purple"
+            },
+            {
+              "value": "PROSPECTION_DIRECTE",
+              "label": "Prospection directe",
+              "color": "orange"
+            },
+            {
+              "value": "PARRAINAGE",
+              "label": "Parrainage",
+              "color": "green"
+            },
+            {
+              "value": "INBOUND",
+              "label": "Inbound",
+              "color": "yellow"
+            }
+          ]
+        },
+        {
+          "name": "statutPartenariat",
+          "label": "Statut partenariat",
+          "type": "SELECT",
+          "options": [
+            {
+              "value": "PROSPECT",
+              "label": "Prospect",
+              "color": "gray"
+            },
+            {
+              "value": "CONTACTE",
+              "label": "Contacté",
+              "color": "yellow"
+            },
+            {
+              "value": "EN_DISCUSSION",
+              "label": "En discussion",
+              "color": "blue"
+            },
+            {
+              "value": "PARTENAIRE_ACTIF",
+              "label": "Partenaire actif",
+              "color": "green"
+            },
+            {
+              "value": "INACTIF",
+              "label": "Inactif",
+              "color": "red"
+            }
+          ],
+          "defaultValue": "PROSPECT"
+        },
+        {
+          "name": "nbContratsSignes",
+          "label": "Nb contrats signés",
+          "type": "NUMBER",
+          "description": "Calculé via workflow (S2). Stocké pour reporting marketing.",
+          "defaultValue": 0
         }
       ]
     }

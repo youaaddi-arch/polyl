@@ -1,0 +1,20 @@
+{
+  "name": "crm-twenty",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Paris Nord Groupe — Twenty CRM setup scripts",
+  "type": "module",
+  "scripts": {
+    "ping": "tsx scripts/ping.ts",
+    "list-objects": "tsx scripts/list-objects.ts",
+    "build": "tsc --noEmit"
+  },
+  "dependencies": {
+    "dotenv": "^16.4.5"
+  },
+  "devDependencies": {
+    "@types/node": "^20.11.0",
+    "tsx": "^4.7.0",
+    "typescript": "^5.3.3"
+  }
+}

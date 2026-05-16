@@ -1,0 +1,73 @@
+{
+  "$schema": "./docs/schema.meta.json",
+  "version": "0.1.0",
+  "workspace": "parisnordgroupe.twenty.com",
+  "entites": [
+    { "code": "PNBS", "nom": "Paris Nord Business School", "domaines": ["Commerce", "Management"] },
+    { "code": "PBA", "nom": "Paris Beauty Academy", "domaines": ["Petite Enfance", "Esthétique"] },
+    { "code": "PNFF", "nom": "Paris Nord Food Formation", "domaines": ["Hôtellerie", "Restauration"] },
+    { "code": "DBS", "nom": "Digital Business School Paris", "domaines": ["Commerce", "Management"] },
+    { "code": "ORCEA", "nom": "ORCEA Amiens", "domaines": ["Commerce", "Management"] },
+    { "code": "PNFB", "nom": "Paris Nord Formation Bâtiment", "domaines": ["Bâtiment", "Peinture", "Électricité", "Propreté"] },
+    { "code": "ALIOS", "nom": "ALIOS", "domaines": ["Continuing education"], "statut": "en_construction" },
+    { "code": "CIDD", "nom": "CIDD", "domaines": ["B2B continuing education", "B2C continuing education"] },
+    { "code": "MYCENES", "nom": "Mycènes Conseil", "domaines": ["CFA"] }
+  ],
+  "objects": {},
+  "pipelines": {
+    "alternance": {
+      "object": "apprenant",
+      "field": "stageAlternance",
+      "stages": [
+        "candidature_recue",
+        "email_bienvenue_envoye",
+        "fiche_besoin_completee",
+        "convoque_tests",
+        "tests_passes",
+        "entretien_motivation_fait",
+        "eligible_placement",
+        "matching_en_cours",
+        "profil_envoye_entreprise",
+        "entretien_entreprise_planifie",
+        "entretien_entreprise_realise",
+        "retenu_par_entreprise",
+        "contrat_cerfa_signe",
+        "en_formation",
+        "diplome",
+        "alumni_upsell"
+      ]
+    },
+    "fc_diplomante": {
+      "object": "apprenant",
+      "field": "stageFcDiplomante",
+      "stages": [
+        "candidature_recue",
+        "email_bienvenue_envoye",
+        "fiche_besoin_completee",
+        "convoque_tests",
+        "tests_passes",
+        "entretien_motivation_fait",
+        "eligible_inscription",
+        "dossier_financement_a_monter",
+        "dossier_financement_en_cours",
+        "financement_valide_convention_signee",
+        "en_formation",
+        "diplome"
+      ]
+    },
+    "fc_courte": {
+      "object": "apprenant",
+      "field": "stageFcCourte",
+      "stages": [
+        "demande_information",
+        "devis_envoye",
+        "devis_accepte",
+        "convention_signee",
+        "confirmation_inscription",
+        "en_formation",
+        "formation_terminee_attestation_envoyee",
+        "satisfaction_recueillie"
+      ]
+    }
+  }
+}

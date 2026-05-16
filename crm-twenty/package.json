@@ -7,6 +7,7 @@
   "scripts": {
     "ping": "tsx scripts/ping.ts",
     "list-objects": "tsx scripts/list-objects.ts",
+    "apply-schema": "tsx scripts/apply-schema.ts",
     "build": "tsc --noEmit"
   },
   "dependencies": {

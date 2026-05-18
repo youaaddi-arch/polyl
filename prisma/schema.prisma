@@ -73,20 +73,28 @@ model Candidat {
   prenom        String
   email         String?
   telephone     String?
+  telephoneSecondaire String?
   adresse       String?
   ville         String?
   codePostal    String?
+  pays          String?   @default("France")
   dateNaissance DateTime?
+  age           Int?
+  genre         String?   // homme, femme, autre
+  nationalite   String?
 
-  // Source d'entrée
-  sourceEntree String? // ATS, formulaire web, prescription, ...
+  // Source & qualification
+  sourceEntree     String?    // ATS, formulaire web, prescription, ...
+  prescripteur     String?    // France Travail, Mission Locale, Cap Emploi, recommandation, ...
+  dateCandidature  DateTime?
+  derniereActivite DateTime?
+  statutLead       String?    @default("froid")  // froid, tiede, chaud, mql, sql, client, perdu
+  scoreLead        Int?       @default(0)  // 0-100
+  persona          String?    // C1, C2, C3
 
-  // Persona (CDC section 4.1)
-  persona String? // C1, C2, C3
-
-  // Pipeline candidat - étape courante (1..19)
+  // Pipeline candidat (parcours pédagogique - 19 étapes du CDC)
   etapePipeline Int    @default(1)
-  statut        String @default("nouveau") // nouveau, en_cours, place, abandon, diplome
+  statut        String @default("nouveau")
 
   // Tests et évaluations
   scorePositionnement Int?
@@ -94,14 +102,60 @@ model Candidat {
   ficheAdaptation     String?
   motivationNote      Int?
 
-  // Liens
-  formationId String?
-  formation   Formation? @relation(fields: [formationId], references: [id])
+  // Formation visée
+  formationId      String?
+  formation        Formation? @relation(fields: [formationId], references: [id])
+  niveauActuel     String?    // CAP, Bac, Bac+2, Bac+5, ...
+  niveauVise       String?
+  situation        String?    // étudiant, salarié, demandeur emploi, ...
+  experiencePro    String?
+  diplomeActuel    String?
+  anneeBac         Int?
 
+  // Financement
+  financementChoisi    String?  // CPF, OPCO, France Travail, Employeur, Personnel
+  montantFinancement   Float?
+  opco                 String?
+  numeroDossierOpco    String?
+  consentDevis         Boolean? @default(false)
+
+  // Matching entreprise (apprentissage)
+  societeMatcheeId  String?
+  societeMatchee    Entreprise? @relation("CandidatSociete", fields: [societeMatcheeId], references: [id])
+  societesProposees String?    // CSV des entreprises proposées
+  typeContratSouhaite String?  // apprentissage, professionnalisation, CDI, CDD
+
+  // Centre / entité
   entiteId String?
   entite   Entite? @relation(fields: [entiteId], references: [id])
 
+  // Mobilité & accessibilité
+  mobiliteGeo  String?  // locale, regionale, nationale
+  permisB      Boolean? @default(false)
+  vehicule     Boolean? @default(false)
+  niveauAnglais String?
+  niveauInformatique String?
+  handicap     Boolean? @default(false)
+  rqth         Boolean? @default(false)
+
+  // RGPD & consentements
+  consentRgpd       Boolean? @default(false)
+  consentNewsletter Boolean? @default(false)
+  consentSms        Boolean? @default(false)
+  consentAppel      Boolean? @default(false)
+
+  // Suivi commercial
   conseillerDedie String?
+  conseillerLead  String?
+  dateRelance     DateTime?
+
+  // Réseaux & docs
+  linkedinUrl String?
+  cv          String?  // chemin / URL CV
+  lettreMotivation String?
+  pieceIdentite    String?
+
+  notes String?
 
   // Relations
   contrats       Contrat[]
@@ -115,9 +169,6 @@ model Candidat {
   tickets        Ticket[]
   activites      Activite[]
 
-  cv    String? // chemin / URL CV
-  notes String?
-
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 }
@@ -129,31 +180,76 @@ model Entreprise {
   id             String  @id @default(cuid())
   raisonSociale  String
   siret          String? @unique
+  siren          String?
   naf            String?
+  codeApe        String?
+  numTVA         String?
   formeJuridique String?
   taille         String? // PME, ETI, GE
+  effectif       Int?
+  chiffreAffaires Float?
+  capitalSocial  Float?
   secteur        String?
+  secteurDetail  String?
 
-  adresse    String?
-  ville      String?
-  codePostal String?
+  // Coordonnées
+  adresse           String?
+  complementAdresse String?
+  ville             String?
+  codePostal        String?
+  pays              String? @default("France")
+  telephoneStandard String?
+  email             String?
+  siteWeb           String?
+  linkedinUrl       String?
 
-  // Persona (CDC section 4.2)
+  // Adresse de facturation
+  adresseFacturation String?
+  villeFacturation   String?
+  cpFacturation      String?
+
   persona String? // E1, E2, E3
 
-  // Pipeline entreprise - étape courante (1..17)
+  // Pipeline entreprise
   etapePipeline  Int    @default(1)
-  statut         String @default("prospect") // prospect, qualifie, partenaire_actif, inactif
-  scorePotentiel Int? // upsell scoring
+  statut         String @default("prospect")
+  scorePotentiel Int?
+  derniereActivite DateTime?
 
-  // Source de détection (CDC section 7.1 étape 1)
-  sourceDetection String? // Indeed, France Travail, LinkedIn Jobs, ...
+  // Source de détection
+  sourceDetection String?
   urlOffre        String?
 
-  // Conseiller commercial
+  // BESOINS DE RECRUTEMENT
+  rechercheAlternants      Boolean? @default(false)
+  rechercheCDI             Boolean? @default(false)
+  rechercheCDD             Boolean? @default(false)
+  rechercheStage           Boolean? @default(false)
+  rechercheFormationSalaries Boolean? @default(false)
+  typeAlternance           String?  // apprentissage, professionnalisation, both
+  nbAlternantsRecherches   Int?
+  nbCDIRecherches          Int?
+  dateBesoinAlternance     DateTime?
+  niveauxRecherches        String?  // CSV: "Niveau 3, Niveau 4, Niveau 5"
+  metiersRecherches        String?  // CSV des métiers recherchés
+
+  // Conventions / OPCO
+  conventionCollective String?
+  opcoRattache         String?  // AKTO, OCAPIAT, ATLAS, ...
+  accordOPCO           Boolean? @default(false)
+  accordTutorat        Boolean? @default(false)
+
+  // Contacts décisionnaires
+  responsableRHNom      String?
+  responsableRHEmail    String?
+  responsableRHTelephone String?
+  dirigeantNom          String?
+  dirigeantEmail        String?
+
+  // Commercial
   commercialDedie String?
 
-  // Entité de rattachement (CFA)
+  // Entité de rattachement
   entiteId String?
   entite   Entite? @relation(fields: [entiteId], references: [id])
 
@@ -170,6 +266,7 @@ model Entreprise {
   meetings       Meeting[]
   tickets        Ticket[]
   activites      Activite[]
+  candidatsMatches Candidat[]      @relation("CandidatSociete")
 
   notes     String?
   createdAt DateTime @default(now())
@@ -378,22 +475,28 @@ model Veille {
 // Une "deal" = une opportunité de placer 1 ou N candidats
 // chez une entreprise (= contrat potentiel)
 // ============================================================
+// Anciennement "Deal" — désormais une OPPORTUNITÉ = une candidature
+// Un apprenant peut avoir plusieurs opportunités (Bachelor 2026, FC courte 2027, ...)
 model Deal {
   id             String    @id @default(cuid())
   titre          String
-  montant        Float? // valeur estimée du contrat (€)
+  // TYPE d'opportunité = sélectionne le pipeline associé
+  type           String    @default("apprentissage") // apprentissage | formation_pro | formation_continue
+  montant        Float?
   devise         String    @default("EUR")
-  probabilite    Int       @default(50) // 0-100 %
+  probabilite    Int       @default(50)
+  dateOuverture  DateTime  @default(now())
   dateClotPrevue DateTime?
+  dateCloture    DateTime?
   dateGagne      DateTime?
-  ownerName      String? // commercial responsable
+  ownerName      String?
+  centreCode     String?  // PNFF, DBS, PNBS, ORCEA, PNFB, PBA
 
-  // Pipeline (configurable)
   pipelineId String?
   pipeline   DealPipeline? @relation(fields: [pipelineId], references: [id])
-  etapeCle   String // clé de la stage actuelle (ex: "qualifie", "proposition", "gagne")
+  etapeCle   String
 
-  statut String @default("ouverte") // ouverte, gagnee, perdue
+  statut String @default("ouverte")
 
   // Liens
   entrepriseId String?
@@ -402,6 +505,14 @@ model Deal {
   candidat     Candidat?   @relation(fields: [candidatId], references: [id])
   formationId  String?
   formation    Formation?  @relation(fields: [formationId], references: [id])
+
+  // Champs spécifiques formation pro / FC
+  devisEnvoyeLe       DateTime?
+  devisValideLe       DateTime?
+  financementEnvoyeLe DateTime?
+  financementAccordeLe DateTime?
+  entreeFormationLe   DateTime?
+  finFormationLe      DateTime?
 
   notes    Note[]
   meetings Meeting[]
@@ -701,6 +812,7 @@ model ImportLog {
   nbCrees    Int      @default(0)
   nbErreurs  Int      @default(0)
   statut     String   @default("termine")
+  detail     String?
   auteur     String?
   createdAt  DateTime @default(now())
 }

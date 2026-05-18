@@ -12,7 +12,7 @@ const NAV: Section[] = [
     items: [
       { href: "/candidats", label: "Contacts (Candidats)", desc: "Fiches apprenants & prospects" },
       { href: "/entreprises", label: "Entreprises", desc: "Comptes & partenaires" },
-      { href: "/deals", label: "Deals", desc: "Pipeline d'opportunités" },
+      { href: "/deals", label: "Opportunités", desc: "3 pipelines : alternance, FC longue, FC courte" },
       { href: "/tickets", label: "Tickets", desc: "Support & SAV" },
       { href: "/listes", label: "Listes", desc: "Segments sauvegardés" },
       { href: "/inbox", label: "Inbox", desc: "Communications unifiées" },
@@ -33,8 +33,10 @@ const NAV: Section[] = [
   {
     label: "Sales",
     items: [
-      { href: "/deals", label: "Pipeline Deals", desc: "Opportunités B2B" },
-      { href: "/quotes", label: "Devis (Quotes)", desc: "Génération devis PDF" },
+      { href: "/deals?type=apprentissage", label: "Pipeline Apprentissage", desc: "10 étapes alternance" },
+      { href: "/deals?type=formation_pro", label: "Pipeline Formation pro", desc: "9 étapes FC longue" },
+      { href: "/deals?type=formation_continue", label: "Pipeline Formation continue", desc: "7 étapes FC courte" },
+      { href: "/quotes", label: "Devis", desc: "Génération devis PDF" },
       { href: "/sequences", label: "Sequences", desc: "Cadences emails" },
       { href: "/candidats/pipeline", label: "Pipeline candidats", desc: "Kanban 19 étapes" },
       { href: "/entreprises/pipeline", label: "Pipeline entreprises", desc: "Kanban 17 étapes" },
@@ -95,11 +97,13 @@ export default function TopNav() {
   return (
     <header className="bg-hubspot-navy text-white sticky top-0 z-50 shadow-md">
       <div className="px-6 h-14 flex items-center gap-1" ref={navRef}>
+        {/* Logo */}
         <Link href="/" className="flex items-center gap-2 mr-6">
           <div className="w-8 h-8 bg-hubspot-orange rounded-full flex items-center justify-center font-bold text-sm">C</div>
           <span className="font-bold text-base hidden sm:inline">CRM Formation</span>
         </Link>
 
+        {/* Nav items with dropdowns */}
         <nav className="flex items-center">
           {NAV.map((section) => (
             <div key={section.label} className="relative">
@@ -137,6 +141,7 @@ export default function TopNav() {
           ))}
         </nav>
 
+        {/* Right side */}
         <div className="flex-1" />
 
         <Link href="/recherche" className="px-3 py-2 hover:bg-white/10 rounded text-sm flex items-center gap-2" title="Recherche globale">

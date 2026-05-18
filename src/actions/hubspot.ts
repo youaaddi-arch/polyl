@@ -6,25 +6,41 @@ import { redirect } from "next/navigation";
 
 export async function creerDeal(formData: FormData) {
   const titre = String(formData.get("titre") || "").trim();
+  const type = String(formData.get("type") || "apprentissage");
   if (!titre) throw new Error("Titre obligatoire");
-  const pipeline = await prisma.dealPipeline.findFirst({ where: { isDefault: true } });
-  if (!pipeline) throw new Error("Aucun pipeline configuré");
+
+  // Mappe type → nom de pipeline
+  const pipelineNomByType: Record<string, string> = {
+    apprentissage: "Apprentissage / Alternance",
+    formation_pro: "Formation professionnelle longue",
+    formation_continue: "Formation continue courte",
+  };
+  const pipeline = await prisma.dealPipeline.findFirst({ where: { nom: pipelineNomByType[type] ?? "Apprentissage / Alternance" } });
+  if (!pipeline) throw new Error("Pipeline introuvable");
+
+  // Première étape du pipeline = demande_renseignement
+  const stages = JSON.parse(pipeline.stages) as { cle: string; ordre: number }[];
+  const premiereEtape = stages.sort((a, b) => a.ordre - b.ordre)[0]?.cle ?? "demande_renseignement";
+
   const deal = await prisma.deal.create({
     data: {
       titre,
+      type,
       montant: Number(formData.get("montant") || 0) || null,
-      probabilite: Number(formData.get("probabilite") || 50),
+      probabilite: 10,
       ownerName: String(formData.get("ownerName") || "") || null,
       pipelineId: pipeline.id,
-      etapeCle: String(formData.get("etapeCle") || "qualifie"),
+      etapeCle: premiereEtape,
+      centreCode: String(formData.get("centreCode") || "") || null,
       entrepriseId: String(formData.get("entrepriseId") || "") || null,
       candidatId: String(formData.get("candidatId") || "") || null,
       formationId: String(formData.get("formationId") || "") || null,
+      dateOuverture: formData.get("dateOuverture") ? new Date(String(formData.get("dateOuverture"))) : new Date(),
       dateClotPrevue: formData.get("dateClotPrevue") ? new Date(String(formData.get("dateClotPrevue"))) : null,
     },
   });
   revalidatePath("/deals");
-  redirect(`/deals/${deal.id}`);
+  redirect(`/deals/${deal.id}?type=${type}`);
 }
 
 export async function changerStageDeal(formData: FormData) {

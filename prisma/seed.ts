@@ -85,21 +85,57 @@ async function main() {
     { prenom: "Romain",  nom: "Dubois",    persona: "C3", entite: "DBS",   formation: fByCode("DBS","Bac+5"),  etape: 8,  ville: "Paris" },
   ];
 
+  const FINANCEMENTS_DEMO = ["CPF", "OPCO", "France Travail", "Employeur", "Personnel"];
+  const STATUTS_LEAD_DEMO = ["chaud", "tiede", "sql", "mql", "chaud", "client", "froid", "sql"];
+  const SITUATIONS_DEMO = ["Lycéen·ne", "Demandeur·euse d'emploi", "Salarié·e en poste", "Étudiant·e", "En reconversion", "Salarié·e en CDD", "Demandeur·euse d'emploi", "Étudiant·e"];
+  const PRESCRIPTEURS_DEMO = ["France Travail", "Mission Locale", "Bouche-à-oreille", "Site web", "Recommandation", "France Travail", "Mission Locale", "Salon"];
+  let idx = 0;
   for (const c of demoCandidats) {
+    const i = idx++;
     await prisma.candidat.create({
       data: {
         prenom: c.prenom,
         nom: c.nom,
         email: `${c.prenom.toLowerCase()}.${c.nom.toLowerCase()}@example.com`,
-        telephone: "06 12 34 56 78",
+        telephone: `06 ${10 + i} ${20 + i} ${30 + i} ${40 + i}`,
+        telephoneSecondaire: i % 2 === 0 ? `01 ${40 + i} ${50 + i} ${60 + i} ${70 + i}` : null,
+        adresse: `${10 + i} rue de la République`,
         ville: c.ville,
+        codePostal: ["75001", "93200", "69003", "75008", "80000", "75011", "93000", "75019"][i] || "75001",
+        pays: "France",
+        dateNaissance: new Date(2000 + (i % 8), (i * 2) % 12, (i * 3) % 28 + 1),
+        age: 18 + (i * 2) % 30,
+        genre: i % 2 === 0 ? "femme" : "homme",
         persona: c.persona,
         etapePipeline: c.etape,
         statut: c.etape >= 13 ? "place" : "en_cours",
         sourceEntree: "Formulaire site web",
+        prescripteur: PRESCRIPTEURS_DEMO[i],
+        dateCandidature: new Date(Date.now() - (60 - i * 5) * 24 * 3600 * 1000),
+        derniereActivite: new Date(Date.now() - (i + 1) * 24 * 3600 * 1000),
+        statutLead: STATUTS_LEAD_DEMO[i],
+        scoreLead: 40 + (i * 10) % 60,
         entiteId: entites[c.entite],
         formationId: c.formation?.id,
         scorePositionnement: 60 + Math.floor(Math.random() * 40),
+        situation: SITUATIONS_DEMO[i],
+        niveauActuel: ["CAP", "Bac", "Bac+2", "Bac+5", "Bac", "CAP", "Bac+2", "Bac+5"][i],
+        niveauVise: c.formation?.niveau ?? null,
+        anneeBac: 2018 + (i % 7),
+        financementChoisi: FINANCEMENTS_DEMO[i % 5],
+        opco: ["AKTO", "OCAPIAT", "ATLAS", null, "AKTO", "OPCO 2i", null, "ATLAS"][i],
+        mobiliteGeo: ["Locale (< 30 km)", "Régionale", "Nationale", "Régionale"][i % 4],
+        permisB: i % 3 === 0,
+        vehicule: i % 4 === 0,
+        niveauAnglais: ["A2", "B1", "B2", "C1", "B1", "A1", "B2", "C1"][i],
+        handicap: false,
+        consentRgpd: true,
+        consentNewsletter: i % 2 === 0,
+        consentSms: i % 3 === 0,
+        consentAppel: true,
+        conseillerDedie: ["Sophie Martin", "Lucas Dubois", "Amélie Leroy"][i % 3],
+        typeContratSouhaite: ["apprentissage", "professionnalisation", "apprentissage", "CDI", "apprentissage", "apprentissage", "CDD", "apprentissage"][i],
+        linkedinUrl: i % 3 === 0 ? `https://linkedin.com/in/${c.prenom.toLowerCase()}${c.nom.toLowerCase()}` : null,
       },
     });
   }
@@ -116,19 +152,52 @@ async function main() {
     { raison: "Cabinet Conseil Pro",       siret: "89000000000088", taille: "PME", persona: "E2", secteur: "Conseil",         ville: "Paris",       etape: 6,  entite: "PNBS" },
   ];
 
+  let eIdx = 0;
   for (const e of demoEntreprises) {
+    const i = eIdx++;
     const ent = await prisma.entreprise.create({
       data: {
         raisonSociale: e.raison,
         siret: e.siret,
+        siren: e.siret?.substring(0, 9),
+        naf: ["4711F", "5610A", "9602A", "8810A", "4329A", "5510Z", "4711F", "7022Z"][i],
+        formeJuridique: ["SARL", "SAS", "SA", "SARL", "SARL", "SA", "SAS", "EURL"][i],
         taille: e.taille,
+        effectif: e.taille === "PME" ? 25 + i * 3 : e.taille === "ETI" ? 150 + i * 10 : 1200 + i * 100,
+        chiffreAffaires: (e.taille === "PME" ? 2 : e.taille === "ETI" ? 50 : 500) * 1000000,
         persona: e.persona,
         secteur: e.secteur,
+        secteurDetail: e.secteur,
+        adresse: `${10 + i * 3} avenue des Champs`,
+        codePostal: ["75009", "69006", "75008", "93200", "75011", "75008", "80000", "75017"][i],
         ville: e.ville,
+        pays: "France",
+        telephoneStandard: `01 ${40 + i} ${50 + i} ${60 + i} ${70 + i}`,
+        email: `contact@${e.raison.toLowerCase().replace(/[^a-z0-9]/g, "")}.fr`,
+        siteWeb: `https://www.${e.raison.toLowerCase().replace(/[^a-z0-9]/g, "")}.fr`,
+        linkedinUrl: `https://linkedin.com/company/${e.raison.toLowerCase().replace(/[^a-z0-9]/g, "-")}`,
         etapePipeline: e.etape,
         statut: e.etape >= 15 ? "partenaire_actif" : "prospect",
         scorePotentiel: 50 + Math.floor(Math.random() * 50),
-        sourceDetection: ["Indeed", "France Travail", "LinkedIn Jobs", "HelloWork"][Math.floor(Math.random()*4)],
+        derniereActivite: new Date(Date.now() - (i + 1) * 24 * 3600 * 1000),
+        sourceDetection: ["Indeed", "France Travail", "LinkedIn Jobs", "HelloWork", "Indeed", "Salon", "Recommandation", "Site web"][i],
+        rechercheAlternants: true,
+        rechercheCDI: i % 2 === 0,
+        rechercheCDD: i % 3 === 0,
+        rechercheFormationSalaries: i % 4 === 0,
+        typeAlternance: i % 2 === 0 ? "apprentissage" : "both",
+        nbAlternantsRecherches: 1 + (i % 4),
+        nbCDIRecherches: i % 3 === 0 ? 1 + (i % 2) : 0,
+        dateBesoinAlternance: new Date(Date.now() + (60 + i * 10) * 24 * 3600 * 1000),
+        metiersRecherches: e.secteur,
+        opcoRattache: ["AKTO", "OPCO Commerce", "AKTO", "OPCO EP", "Constructys", "AKTO", "OPCO Commerce", "ATLAS"][i],
+        accordOPCO: i % 2 === 0,
+        accordTutorat: i % 3 === 0,
+        conventionCollective: ["Restauration rapide", "Commerce détail alimentaire", "Esthétique", "Petite enfance", "Bâtiment ETAM", "Hôtellerie", "Distribution", "Bureaux d'études"][i],
+        responsableRHNom: ["Marie Dupont", "Jean Martin", "Sophie Bernard", "Pierre Petit", "Anne Robert", "Marc Leroy", "Camille Moreau", "Julie Simon"][i],
+        responsableRHEmail: `rh@${e.raison.toLowerCase().replace(/[^a-z0-9]/g, "")}.fr`,
+        responsableRHTelephone: `01 ${40 + i} ${50 + i} ${65 + i} ${75 + i}`,
+        commercialDedie: ["Sophie Martin", "Lucas Dubois", "Amélie Leroy"][i % 3],
         entiteId: entites[e.entite],
       },
     });
@@ -200,35 +269,75 @@ async function main() {
     ],
   });
 
-  console.log("Seed: pipeline de deals + deals de démo…");
-  const stagesDeal = [
-    { cle: "qualifie",     libelle: "Qualifié",     probabilite: 20, ordre: 1 },
-    { cle: "proposition",  libelle: "Proposition envoyée", probabilite: 50, ordre: 2 },
-    { cle: "negociation",  libelle: "Négociation",  probabilite: 70, ordre: 3 },
-    { cle: "gagne",        libelle: "Gagné",        probabilite: 100, ordre: 4 },
-    { cle: "perdu",        libelle: "Perdu",        probabilite: 0, ordre: 5 },
-  ];
-  const pipelineDeal = await prisma.dealPipeline.create({
-    data: { nom: "Pipeline commercial standard", stages: JSON.stringify(stagesDeal), isDefault: true },
+  console.log("Seed: 3 pipelines d'opportunités…");
+  const { PIPELINE_APPRENTISSAGE, PIPELINE_FORMATION_PRO, PIPELINE_FORMATION_CONTINUE } = await import("../src/lib/options");
+
+  const pipelineApprentissage = await prisma.dealPipeline.create({
+    data: { nom: "Apprentissage / Alternance", stages: JSON.stringify(PIPELINE_APPRENTISSAGE), isDefault: true },
   });
+  const pipelineFormationPro = await prisma.dealPipeline.create({
+    data: { nom: "Formation professionnelle longue", stages: JSON.stringify(PIPELINE_FORMATION_PRO), isDefault: false },
+  });
+  const pipelineFormationContinue = await prisma.dealPipeline.create({
+    data: { nom: "Formation continue courte", stages: JSON.stringify(PIPELINE_FORMATION_CONTINUE), isDefault: false },
+  });
+
+  const pipelinesByType: Record<string, string> = {
+    apprentissage:      pipelineApprentissage.id,
+    formation_pro:      pipelineFormationPro.id,
+    formation_continue: pipelineFormationContinue.id,
+  };
+  const stagesByType: Record<string, { cle: string; libelle: string; probabilite: number; ordre: number }[]> = {
+    apprentissage:      JSON.parse(JSON.stringify(PIPELINE_APPRENTISSAGE)),
+    formation_pro:      JSON.parse(JSON.stringify(PIPELINE_FORMATION_PRO)),
+    formation_continue: JSON.parse(JSON.stringify(PIPELINE_FORMATION_CONTINUE)),
+  };
 
   const allEntreprises = await prisma.entreprise.findMany({ include: { entite: true } });
   const allCandidats = await prisma.candidat.findMany();
-  for (let i = 0; i < allEntreprises.length; i++) {
-    const ent = allEntreprises[i];
-    const stage = stagesDeal[i % 4]; // distribuer sur les 4 premières
+  const TYPES_OPP = ["apprentissage", "formation_pro", "formation_continue"];
+
+  for (let i = 0; i < allCandidats.length; i++) {
+    const c = allCandidats[i];
+    const type = TYPES_OPP[i % 3];
+    const stages = stagesByType[type];
+    const stage = stages[Math.min(i % stages.length, stages.length - 2)];
+    const labelType = type === "apprentissage" ? "Apprentissage" : type === "formation_pro" ? "FC longue" : "FC courte";
     await prisma.deal.create({
       data: {
-        titre: `Recrutement alternant — ${ent.raisonSociale}`,
-        montant: 8000 + Math.floor(Math.random() * 12000),
+        titre: `${labelType} — ${c.prenom} ${c.nom}`,
+        type,
+        montant: 5000 + Math.floor(Math.random() * 15000),
         probabilite: stage.probabilite,
+        dateOuverture: new Date(Date.now() - Math.floor(Math.random() * 90) * 24 * 3600 * 1000),
         dateClotPrevue: new Date(Date.now() + (30 + i * 5) * 24 * 3600 * 1000),
-        ownerName: "Sophie Martin",
-        pipelineId: pipelineDeal.id,
+        ownerName: ["Sophie Martin", "Lucas Dubois", "Amélie Leroy"][i % 3],
+        pipelineId: pipelinesByType[type],
         etapeCle: stage.cle,
-        statut: stage.cle === "gagne" ? "gagnee" : stage.cle === "perdu" ? "perdue" : "ouverte",
-        entrepriseId: ent.id,
-        candidatId: allCandidats[i % allCandidats.length]?.id,
+        centreCode: c.entiteId ? (Object.entries(entites).find(([_, id]) => id === c.entiteId)?.[0] ?? null) : null,
+        statut: "ouverte",
+        candidatId: c.id,
+        entrepriseId: type === "apprentissage" ? allEntreprises[i % allEntreprises.length]?.id : null,
+        formationId: c.formationId,
+      },
+    });
+  }
+
+  // Démontrer qu'un candidat peut avoir plusieurs opportunités
+  if (allCandidats[0]) {
+    const stagesFC = stagesByType.formation_continue;
+    await prisma.deal.create({
+      data: {
+        titre: `FC courte 2027 — ${allCandidats[0].prenom} ${allCandidats[0].nom}`,
+        type: "formation_continue",
+        montant: 3500,
+        probabilite: 35,
+        dateOuverture: new Date(),
+        pipelineId: pipelinesByType.formation_continue,
+        etapeCle: stagesFC[2].cle,
+        statut: "ouverte",
+        candidatId: allCandidats[0].id,
+        formationId: allCandidats[0].formationId,
       },
     });
   }

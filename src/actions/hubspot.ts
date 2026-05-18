@@ -166,3 +166,39 @@ export async function soumettreFormulaire(slug: string, donnees: Record<string, 
   revalidatePath("/formulaires");
   revalidatePath("/candidats");
 }
+
+export async function creerCampagne(formData: FormData) {
+  const nom = String(formData.get("nom") || "").trim();
+  const sujet = String(formData.get("sujet") || "").trim();
+  if (!nom || !sujet) throw new Error("Nom et sujet obligatoires");
+
+  // Calcule le nombre de destinataires depuis les filtres reportés
+  const filtres: Record<string, string> = {};
+  for (const [k, v] of formData.entries()) {
+    if (k.startsWith("filtre_") && v) filtres[k.replace("filtre_", "")] = String(v);
+  }
+  const where: any = {};
+  if (filtres.statut) where.statut = filtres.statut;
+  if (filtres.statutLead) where.statutLead = filtres.statutLead;
+  if (filtres.situation) where.situation = filtres.situation;
+  if (filtres.financementChoisi) where.financementChoisi = filtres.financementChoisi;
+  if (filtres.persona) where.persona = filtres.persona;
+  const nbDestinataires = Object.keys(where).length > 0
+    ? await prisma.candidat.count({ where: { ...where, consentNewsletter: true } })
+    : 0;
+
+  const campagne = await prisma.campaign.create({
+    data: {
+      nom,
+      sujet,
+      contenu: String(formData.get("contenu") || ""),
+      listeId: String(formData.get("listeId") || "") || null,
+      templateId: String(formData.get("templateId") || "") || null,
+      statut: String(formData.get("statut") || "brouillon"),
+      dateEnvoi: formData.get("dateEnvoi") ? new Date(String(formData.get("dateEnvoi"))) : null,
+      nbDestinataires,
+    },
+  });
+  revalidatePath("/campaigns");
+  redirect(`/campaigns`);
+}

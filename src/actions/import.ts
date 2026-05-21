@@ -286,6 +286,27 @@ async function importerAlternance(file: File) {
   const idxDateContrat = headers.findIndex((h) => norm(h).includes("date demarrage contrat"));
   const idxOpcoEnt = headers.findIndex((h) => norm(h) === "opco");
   const idxContratUrl = headers.findIndex((h) => norm(h) === "contrats");
+  // Colonne "AFFECTATION PROMO REELLE" ou colonne vide juste après DATE DEMARRAGE FORMATION
+  let idxPromo = headers.findIndex((h) => norm(h).includes("affectation promo") || norm(h).includes("promo reelle"));
+  if (idxPromo < 0 && idxDateFormation >= 0) idxPromo = idxDateFormation + 1;
+
+  // Map code promo → intitulé formation (catalogue PNBS/DBS)
+  function detecterFormation(code: string): string | null {
+    const c = code.toUpperCase().replace(/\s+/g, "");
+    if (/^BACH\d*/.test(c) || c.includes("BACHELOR") || c.includes("REM")) return "TP Responsable d'Établissement Marchand";
+    if (c.startsWith("NTC") || c.includes("NEGOCIATEUR") || c.includes("TECHNICO")) return "TP Négociateur Technico-Commercial";
+    if (c === "CC" || /^CC\d/.test(c) || c.includes("CONSEILLER")) return "TP Conseiller Commercial";
+    if (c.includes("MASTER") || c.includes("MBU") || c.includes("MANAGER BUSINESS")) return "MASTER Manager Business Unit";
+    return null;
+  }
+
+  // Pré-charge les formations PNBS pour matcher rapidement
+  const entitePNBS = await prisma.entite.findUnique({ where: { code: "PNBS" } });
+  const formationsCache: Map<string, string> = new Map();
+  if (entitePNBS) {
+    const formations = await prisma.formation.findMany({ where: { entiteId: entitePNBS.id } });
+    for (const f of formations) formationsCache.set(f.intitule, f.id);
+  }
 
   if (idxEntreprise < 0 || idxNom < 0 || idxPrenom < 0) {
     throw new Error("Colonnes minimales manquantes (NOM, Prenom, ENTREPRISE)");
@@ -300,16 +321,14 @@ async function importerAlternance(file: File) {
   const idxMailCand = findIn(/^mail$/, 0, idxEntreprise);
   const idxAdrCand = findIn(/^adresse$/, 0, idxEntreprise);
   const idxVilleCand = findIn(/^ville$/, 0, idxEntreprise);
-  const idxDateNaiss = idxMailCand >= 0 ? idxMailCand + 1 : -1; // date naissance = col après mail
+  const idxDateNaiss = idxMailCand >= 0 ? idxMailCand + 1 : -1;
 
-  // Sous-colonnes entreprise : entre idxEntreprise et idxTuteur (exclu)
   const limitEnt = idxTuteur >= 0 ? idxTuteur : headers.length;
   const idxTelEnt = findIn(/^tel$/, idxEntreprise, limitEnt);
   const idxMailEnt = findIn(/^mail$/, idxEntreprise, limitEnt);
   const idxAdrEnt = findIn(/^adresse$/, idxEntreprise, limitEnt);
   const idxVilleEnt = findIn(/^ville$/, idxEntreprise, limitEnt);
 
-  // Tuteur
   const idxPrenomTut = findIn(/prenom tut|^prenom$/, idxTuteur, headers.length);
   const idxMailTut = findIn(/mail tuteur|^mail$/, idxTuteur, headers.length);
 
@@ -371,6 +390,11 @@ async function importerAlternance(file: File) {
       const statutRaw = get(row, idxStatut).toLowerCase();
       const statutContrat = STATUT_MAP[statutRaw] ?? "brouillon";
 
+      // Détection formation visée depuis code promo (BACH/NTC/CC/MASTER)
+      const codePromo = get(row, idxPromo);
+      const intituleFormation = detecterFormation(codePromo);
+      const formationId = intituleFormation ? formationsCache.get(intituleFormation) ?? null : null;
+
       const candidat = await prisma.candidat.create({
         data: {
           nom,
@@ -382,6 +406,8 @@ async function importerAlternance(file: File) {
           dateNaissance: dateNaiss,
           diplomeActuel: get(row, idxDernierDiplome) || null,
           numeroDossierOpco: get(row, idxOpcoDossier) || null,
+          formationId,
+          entiteId: entitePNBS?.id,
           societeMatcheeId: entrepriseId,
           sourceEntree: "Import alternance PNBS",
           statutLead: statutRaw === "accorde" || statutRaw === "accordé" ? "client" : statutRaw === "rupture" ? "perdu" : "chaud",
@@ -391,7 +417,7 @@ async function importerAlternance(file: File) {
           typeContratSouhaite: "apprentissage",
           dateCandidature: dateFormation ?? new Date(),
           derniereActivite: new Date(),
-          notes: numSecu ? `N° SS : ${numSecu}` : undefined,
+          notes: [numSecu ? `N° SS : ${numSecu}` : null, codePromo ? `Promo : ${codePromo}` : null].filter(Boolean).join("\n") || undefined,
           consentRgpd: true,
         },
       });

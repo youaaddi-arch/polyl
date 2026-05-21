@@ -54,6 +54,15 @@ async function main() {
 
   console.log("Seed: catalogue formations…");
   for (const f of CATALOGUE) {
+    // Montant par défaut selon le type si pas spécifié
+    const montantDefaut = f.montant ?? (
+      f.type === "Master" ? 9500 :
+      f.type === "Titre Professionnel" && f.dureeMois && f.dureeMois >= 18 ? 8500 :
+      f.type === "Titre Professionnel" ? 7500 :
+      f.type === "CAP" ? 6500 :
+      f.type === "Formation continue" ? 1490 :
+      6000
+    );
     await prisma.formation.create({
       data: {
         intitule: f.intitule,
@@ -63,6 +72,7 @@ async function main() {
         secteurs: f.secteurs,
         metiers: f.metiers,
         dureeMois: f.dureeMois,
+        montant: montantDefaut,
         entiteId: entites[f.entiteCode],
         financements: "OPCO, CPF, France Travail, employeur",
       },

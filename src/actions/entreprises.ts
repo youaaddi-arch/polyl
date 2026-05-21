@@ -104,9 +104,31 @@ export async function creerEntreprise(formData: FormData) {
           },
         });
       }
-    } catch {
-      // JSON invalide, on ignore
-    }
+    } catch {}
+  }
+
+  // Crée automatiquement les Contacts depuis Hunter.io (RH / Formation cochés)
+  const contactsHunterJSON = String(formData.get("contactsHunterJSON") || "");
+  if (contactsHunterJSON) {
+    try {
+      const contacts = JSON.parse(contactsHunterJSON) as {
+        email: string; prenom: string | null; nom: string | null;
+        poste: string | null; service: string | null; telephone: string | null;
+      }[];
+      for (const c of contacts) {
+        if (!c.email) continue;
+        await prisma.contact.create({
+          data: {
+            nom: c.nom || c.email.split("@")[0],
+            prenom: c.prenom || "—",
+            email: c.email,
+            telephone: c.telephone ?? undefined,
+            fonction: c.poste || c.service || "Contact",
+            entrepriseId: entreprise.id,
+          },
+        });
+      }
+    } catch {}
   }
 
   revalidatePath("/entreprises");

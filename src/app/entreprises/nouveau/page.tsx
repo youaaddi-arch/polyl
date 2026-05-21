@@ -2,6 +2,7 @@ import { prisma } from "@/lib/db";
 import { creerEntreprise } from "@/actions/entreprises";
 import { PERSONAS_ENTREPRISE } from "@/lib/entites";
 import SiretAutoFill from "@/components/SiretAutoFill";
+import HunterContactsSearch from "@/components/HunterContactsSearch";
 import Link from "next/link";
 
 export const dynamic = "force-dynamic";
@@ -112,6 +113,7 @@ export default async function NouvelleEntreprisePage() {
             <Field label="Dirigeant — Nom" name="dirigeantNom" />
             <Field label="Dirigeant — Email" name="dirigeantEmail" type="email" />
           </div>
+          <HunterContactsSearch />
         </section>
 
         <section className="card p-6 space-y-4">

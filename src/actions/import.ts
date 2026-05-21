@@ -320,20 +320,27 @@ async function importerAlternance(file: File) {
   const idxTelCand = findIn(/^tel$/, 0, idxEntreprise);
   const idxMailCand = findIn(/^mail$/, 0, idxEntreprise);
   const idxAdrCand = findIn(/^adresse$/, 0, idxEntreprise);
+  // CP candidat = colonne sans titre juste après adresse, on prend les chiffres
   const idxVilleCand = findIn(/^ville$/, 0, idxEntreprise);
-  const idxDateNaiss = idxMailCand >= 0 ? idxMailCand + 1 : -1;
+  const idxDateNaiss = idxMailCand >= 0 ? idxMailCand + 1 : -1; // date naissance = col après mail (vu dans le fichier)
 
+  // Sous-colonnes entreprise : entre idxEntreprise et idxTuteur (exclu)
   const limitEnt = idxTuteur >= 0 ? idxTuteur : headers.length;
   const idxTelEnt = findIn(/^tel$/, idxEntreprise, limitEnt);
   const idxMailEnt = findIn(/^mail$/, idxEntreprise, limitEnt);
   const idxAdrEnt = findIn(/^adresse$/, idxEntreprise, limitEnt);
   const idxVilleEnt = findIn(/^ville$/, idxEntreprise, limitEnt);
 
+  // Tuteur
   const idxPrenomTut = findIn(/prenom tut|^prenom$/, idxTuteur, headers.length);
   const idxMailTut = findIn(/mail tuteur|^mail$/, idxTuteur, headers.length);
 
-  let candidatsCrees = 0, entreprisesCreees = 0, contactsCrees = 0, contratsCrees = 0, erreurs = 0;
-  const entrepriseCache = new Map<string, string>();
+  let candidatsCrees = 0, entreprisesCreees = 0, contactsCrees = 0, contratsCrees = 0, dealsCrees = 0;
+  let rejNomVide = 0, rejPrenomVide = 0, exceptions = 0;
+  const entrepriseCache = new Map<string, string>(); // SIRET ou nom normalisé → id
+
+  // Pipeline apprentissage pour les deals
+  const pipelineApp = await prisma.dealPipeline.findFirst({ where: { nom: { contains: "Apprentissage" } } });
 
   const STATUT_MAP: Record<string, string> = {
     "accorde": "actif", "accordé": "actif",
@@ -350,47 +357,53 @@ async function importerAlternance(file: File) {
       const nom = get(row, idxNom);
       const prenom = get(row, idxPrenom);
       const raison = get(row, idxEntreprise);
-      if (!nom || !prenom || !raison) { erreurs++; continue; }
+      if (!nom) { rejNomVide++; continue; }
+      if (!prenom) { rejPrenomVide++; continue; }
 
-      const siret = normSiret(get(row, idxSiret));
-      const cacheKey = siret ?? raison.toLowerCase().trim();
-      let entrepriseId = entrepriseCache.get(cacheKey);
-      if (!entrepriseId) {
-        const existante = siret ? await prisma.entreprise.findFirst({ where: { siret } }) : await prisma.entreprise.findFirst({ where: { raisonSociale: raison } });
-        if (existante) {
-          entrepriseId = existante.id;
-        } else {
-          const e = await prisma.entreprise.create({
-            data: {
-              raisonSociale: raison,
-              siret: siret ?? undefined,
-              siren: siret?.substring(0, 9),
-              opcoRattache: get(row, idxOpcoEnt) || null,
-              adresse: get(row, idxAdrEnt) || null,
-              ville: get(row, idxVilleEnt) || null,
-              telephoneStandard: get(row, idxTelEnt) || null,
-              email: get(row, idxMailEnt) || null,
-              statut: "partenaire_actif",
-              etapePipeline: 15,
-              sourceDetection: "Import alternance",
-              accordOPCO: true,
-              rechercheAlternants: true,
-              derniereActivite: new Date(),
-            },
-          });
-          entrepriseId = e.id;
-          entreprisesCreees++;
+      // 1) ENTREPRISE (dédupe par SIRET, sinon par nom) — optionnelle
+      let entrepriseId: string | undefined;
+      if (raison) {
+        const siret = normSiret(get(row, idxSiret));
+        const cacheKey = siret ?? raison.toLowerCase().trim();
+        entrepriseId = entrepriseCache.get(cacheKey);
+        if (!entrepriseId) {
+          const existante = siret ? await prisma.entreprise.findFirst({ where: { siret } }) : await prisma.entreprise.findFirst({ where: { raisonSociale: raison } });
+          if (existante) {
+            entrepriseId = existante.id;
+          } else {
+            const e = await prisma.entreprise.create({
+              data: {
+                raisonSociale: raison,
+                siret: siret ?? undefined,
+                siren: siret?.substring(0, 9),
+                opcoRattache: get(row, idxOpcoEnt) || null,
+                adresse: get(row, idxAdrEnt) || null,
+                ville: get(row, idxVilleEnt) || null,
+                telephoneStandard: get(row, idxTelEnt) || null,
+                email: get(row, idxMailEnt) || null,
+                statut: "partenaire_actif",
+                etapePipeline: 15,
+                sourceDetection: "Import alternance",
+                accordOPCO: true,
+                rechercheAlternants: true,
+                derniereActivite: new Date(),
+              },
+            });
+            entrepriseId = e.id;
+            entreprisesCreees++;
+          }
+          entrepriseCache.set(cacheKey, entrepriseId);
         }
-        entrepriseCache.set(cacheKey, entrepriseId);
       }
 
+      // 2) CANDIDAT
       const dateNaiss = parseDate(get(row, idxDateNaiss));
       const dateFormation = parseDate(get(row, idxDateFormation));
       const numSecu = get(row, idxNumSecu);
       const statutRaw = get(row, idxStatut).toLowerCase();
       const statutContrat = STATUT_MAP[statutRaw] ?? "brouillon";
 
-      // Détection formation visée depuis code promo (BACH/NTC/CC/MASTER)
+      // Détection formation visée depuis code promo
       const codePromo = get(row, idxPromo);
       const intituleFormation = detecterFormation(codePromo);
       const formationId = intituleFormation ? formationsCache.get(intituleFormation) ?? null : null;
@@ -423,11 +436,12 @@ async function importerAlternance(file: File) {
       });
       candidatsCrees++;
 
+      // 3) CONTACT TUTEUR (uniquement si entreprise existe)
       const nomTut = get(row, idxTuteur);
       const prenomTut = get(row, idxPrenomTut);
       const mailTut = get(row, idxMailTut);
       let contactId: string | null = null;
-      if (nomTut) {
+      if (entrepriseId && nomTut) {
         const c = await prisma.contact.create({
           data: {
             nom: nomTut,
@@ -442,29 +456,57 @@ async function importerAlternance(file: File) {
         contactsCrees++;
       }
 
-      const dateDebut = parseDate(get(row, idxDateContrat)) ?? dateFormation ?? new Date();
-      const dateFin = new Date(dateDebut);
-      dateFin.setMonth(dateFin.getMonth() + 12);
-      await prisma.contrat.create({
-        data: {
-          type: "apprentissage",
-          dateDebut,
-          dateFin,
-          opco: get(row, idxOpcoEnt) || null,
-          numeroCERFA: get(row, idxOpcoDossier) || null,
-          statut: statutContrat,
-          candidatId: candidat.id,
-          entrepriseId,
-          maitreAppContactId: contactId ?? undefined,
-        },
-      });
-      contratsCrees++;
+      // 4) CONTRAT + DEAL (uniquement si entreprise existe)
+      if (entrepriseId) {
+        const dateDebut = parseDate(get(row, idxDateContrat)) ?? dateFormation ?? new Date();
+        const dateFin = new Date(dateDebut);
+        dateFin.setMonth(dateFin.getMonth() + 12);
+        await prisma.contrat.create({
+          data: {
+            type: "apprentissage",
+            dateDebut,
+            dateFin,
+            opco: get(row, idxOpcoEnt) || null,
+            numeroCERFA: get(row, idxOpcoDossier) || null,
+            statut: statutContrat,
+            candidatId: candidat.id,
+            entrepriseId,
+            maitreAppContactId: contactId ?? undefined,
+          },
+        });
+        contratsCrees++;
 
+        // DEAL / OPPORTUNITÉ (= une candidature placée)
+        const estGagne = statutRaw === "accorde" || statutRaw === "accordé";
+        const estPerdu = statutRaw === "rupture";
+        await prisma.deal.create({
+          data: {
+            titre: `Apprentissage — ${prenom} ${nom} chez ${raison}`,
+            type: "apprentissage",
+            montant: 9500,
+            probabilite: estGagne ? 100 : estPerdu ? 0 : 80,
+            dateOuverture: dateFormation ?? new Date(),
+            dateGagne: estGagne ? (dateDebut ?? new Date()) : null,
+            dateCloture: estPerdu ? new Date() : null,
+            ownerName: "Import alternance",
+            centreCode: "PNBS",
+            pipelineId: pipelineApp?.id ?? null,
+            etapeCle: estGagne ? "entree_formation" : estPerdu ? "perdu" : "contrat_accorde",
+            statut: estGagne ? "gagne" : estPerdu ? "perdu" : "ouverte",
+            candidatId: candidat.id,
+            entrepriseId,
+            formationId: formationId ?? undefined,
+          },
+        });
+        dealsCrees++;
+      }
+
+      // 5) Activite (timeline)
       const urlDrive = get(row, idxContratUrl);
       await prisma.activite.create({
         data: {
           type: "document",
-          titre: `Contrat alternance ${statutRaw.toUpperCase() || "importé"} — ${raison}`,
+          titre: `Contrat alternance ${statutRaw.toUpperCase() || "importé"}${raison ? " — " + raison : ""}`,
           contenu: urlDrive ? `Lien Drive du contrat : ${urlDrive}` : null,
           auteur: "Import alternance",
           candidatId: candidat.id,
@@ -472,19 +514,20 @@ async function importerAlternance(file: File) {
         },
       });
     } catch (e) {
-      erreurs++;
+      exceptions++;
     }
   }
 
+  const totalErreurs = rejNomVide + rejPrenomVide + exceptions;
   await prisma.importLog.create({
     data: {
       objet: "alternance",
       nomFichier: file.name,
       nbLignes: rows.length,
       nbCrees: candidatsCrees,
-      nbErreurs: erreurs,
+      nbErreurs: totalErreurs,
       statut: "termine",
-      detail: `${candidatsCrees} candidats · ${entreprisesCreees} entreprises · ${contactsCrees} tuteurs · ${contratsCrees} contrats`,
+      detail: `${candidatsCrees} candidats · ${entreprisesCreees} entreprises · ${contactsCrees} tuteurs · ${contratsCrees} contrats · ${dealsCrees} opportunités | Rejets : NOM vide ${rejNomVide}, Prenom vide ${rejPrenomVide}, exceptions ${exceptions}`,
     } as any,
   });
 

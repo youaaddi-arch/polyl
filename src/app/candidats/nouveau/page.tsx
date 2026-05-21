@@ -6,7 +6,7 @@ export const dynamic = "force-dynamic";
 export default async function NouveauCandidatPage() {
   const [entites, formationsRaw, entreprises] = await Promise.all([
     prisma.entite.findMany({ orderBy: { code: "asc" } }),
-    prisma.formation.findMany({ orderBy: { intitule: "asc" }, include: { entite: true } }),
+    prisma.formation.findMany({ orderBy: [{ type: "asc" }, { intitule: "asc" }], include: { entite: true } }),
     prisma.entreprise.findMany({ orderBy: { raisonSociale: "asc" } }),
   ]);
 
@@ -15,7 +15,8 @@ export default async function NouveauCandidatPage() {
     intitule: f.intitule,
     niveau: f.niveau,
     type: f.type,
-    entiteCode: f.entite.code,
+    entiteCode: f.entite?.code ?? null,
+    domaine: f.domaine,
     montant: f.montant,
   }));
 

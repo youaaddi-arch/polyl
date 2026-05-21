@@ -1,4 +1,5 @@
-// Catalogue formations - CDC section 2.1 + ALIOS Formation Continue
+// Catalogue formations - CDC section 2.1
+// Source : pages 4-6 du cahier des charges V2.0
 
 export type FormationSeed = {
   entiteCode: string;
@@ -46,21 +47,5 @@ export const CATALOGUE: FormationSeed[] = [
   { entiteCode: "PBA",  intitule: "CAP Esthétique Cosmétique Parfumerie",    niveau: "Niveau 3 (CAP)",    type: "CAP",                 voieAcces: "Apprentissage & Formation continue", secteurs: "Esthétique, Cosmétique", metiers: "Esthéticienne, conseillère beauté", dureeMois: 12 },
 ];
 
-// FORMATIONS CONTINUES ALIOS
-const FORMATIONS_CONTINUES: FormationSeed[] = [
-  { entiteCode: "ALIOS", intitule: "Excel Avancé - Niveau Expert",          niveau: "Sans niveau", type: "Formation continue", voieAcces: "Formation continue (CPF, plan dev)", secteurs: "Bureautique", metiers: "Tous métiers", dureeMois: 1, montant: 1490 },
-  { entiteCode: "ALIOS", intitule: "Management d'équipe niveau 1",          niveau: "Sans niveau", type: "Formation continue", voieAcces: "Formation continue (CPF, plan dev)", secteurs: "Management", metiers: "Manager", dureeMois: 1, montant: 1890 },
-  { entiteCode: "ALIOS", intitule: "Anglais professionnel B1 - TOEIC",      niveau: "Sans niveau", type: "Formation continue", voieAcces: "Formation continue (CPF)", secteurs: "Langues", metiers: "Tous métiers", dureeMois: 2, montant: 1290 },
-  { entiteCode: "ALIOS", intitule: "Anglais professionnel B2 - TOEIC",      niveau: "Sans niveau", type: "Formation continue", voieAcces: "Formation continue (CPF)", secteurs: "Langues", metiers: "Tous métiers", dureeMois: 2, montant: 1490 },
-  { entiteCode: "ALIOS", intitule: "Habilitation électrique BR/B1V",        niveau: "Sans niveau", type: "Formation continue", voieAcces: "Formation continue (POEI, plan dev)", secteurs: "Bâtiment, Sécurité", metiers: "Électricien, agent maintenance", dureeMois: 1, montant: 690 },
-  { entiteCode: "ALIOS", intitule: "SST - Sauveteur Secouriste du Travail", niveau: "Sans niveau", type: "Formation continue", voieAcces: "Formation continue (plan dev)", secteurs: "Sécurité", metiers: "Tous métiers", dureeMois: 1, montant: 450 },
-  { entiteCode: "ALIOS", intitule: "Gestes et postures",                    niveau: "Sans niveau", type: "Formation continue", voieAcces: "Formation continue (plan dev)", secteurs: "Sécurité", metiers: "Tous métiers", dureeMois: 1, montant: 350 },
-  { entiteCode: "ALIOS", intitule: "Comptabilité générale - Débutant",      niveau: "Sans niveau", type: "Formation continue", voieAcces: "Formation continue (CPF)", secteurs: "Comptabilité", metiers: "Assistant comptable", dureeMois: 2, montant: 1890 },
-  { entiteCode: "ALIOS", intitule: "Communication digitale & réseaux sociaux", niveau: "Sans niveau", type: "Formation continue", voieAcces: "Formation continue (CPF)", secteurs: "Marketing, Communication", metiers: "Community manager", dureeMois: 1, montant: 1690 },
-  { entiteCode: "ALIOS", intitule: "Reconversion - Bilan de compétences",   niveau: "Sans niveau", type: "Formation continue", voieAcces: "Formation continue (CPF, CPF TP)", secteurs: "Accompagnement", metiers: "Tous métiers", dureeMois: 1, montant: 1990 },
-  { entiteCode: "ALIOS", intitule: "Préparation au permis cariste CACES R489", niveau: "Sans niveau", type: "Formation continue", voieAcces: "Formation continue (POEI, AIF)", secteurs: "Logistique", metiers: "Cariste", dureeMois: 1, montant: 890 },
-  { entiteCode: "ALIOS", intitule: "Initiation à la programmation Python",  niveau: "Sans niveau", type: "Formation continue", voieAcces: "Formation continue (CPF)", secteurs: "Numérique", metiers: "Développeur junior", dureeMois: 2, montant: 2490 },
-  { entiteCode: "ALIOS", intitule: "Création d'entreprise & micro-entreprise", niveau: "Sans niveau", type: "Formation continue", voieAcces: "Formation continue (AIF, CPF)", secteurs: "Entrepreneuriat", metiers: "Auto-entrepreneur", dureeMois: 1, montant: 1490 },
-];
-
-CATALOGUE.push(...FORMATIONS_CONTINUES);
+// Note : les 120 formations continues ALIOS sont dans src/lib/formations-alios.ts
+// Elles sont chargées séparément par le seed et n'ont PAS d'entité (formation continue accessible à tous)

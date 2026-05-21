@@ -39,6 +39,7 @@ model Formation {
   niveau               String // "Niveau 3 (CAP)", "Niveau 4 (Bac)", ...
   type                 String // "Titre Professionnel", "CAP", "Master"
   voieAcces            String // "Apprentissage & Formation continue"
+  montant              Float?  // prix moyen de la formation (€) — sert à auto-remplir le devis
   dureeMois            Int?
   rythme               String? // ex : "2 sem école / 3 sem entreprise"
   secteurs             String? // CSV des secteurs cibles
@@ -113,11 +114,24 @@ model Candidat {
   anneeBac         Int?
 
   // Financement
-  financementChoisi    String?  // CPF, OPCO, France Travail, Employeur, Personnel
+  statutPro            String?  // demandeur_emploi, salarie, sans_activite, auto_entrepreneur, etudiant
+  ancienneteSalarie    String?  // "moins 6 mois", "6-12 mois", "1-3 ans", "+3 ans"
+  reconversion         Boolean? @default(false)
+  financementChoisi    String?  // CPF, CPF Transition, OPCO, France Travail, POEI, AIF, AFPR, Plan dev compétences, Personnel
   montantFinancement   Float?
   opco                 String?
   numeroDossierOpco    String?
   consentDevis         Boolean? @default(false)
+
+  // Formation hors catalogue (saisie manuelle)
+  formationManuelleNom    String?
+  formationManuelleNiveau String?
+
+  // Candidature externe (Indeed, HelloWork, LBA, etc.)
+  posteVise               String?
+  formationSouhaiteeLibre String?
+  apiSource               String?  // indeed, hellowork, labonnealternance, francetravail
+  apiCandidatureId        String?  // ID externe pour dédupe
 
   // Matching entreprise (apprentissage)
   societeMatcheeId  String?

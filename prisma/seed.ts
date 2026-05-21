@@ -1,6 +1,7 @@
 import { PrismaClient } from "@prisma/client";
 import { ENTITES } from "../src/lib/entites";
 import { CATALOGUE } from "../src/lib/formations-catalogue";
+import { ALIOS_FORMATIONS, prixDefaut, DOMAINES_ALIOS } from "../src/lib/formations-alios";
 
 const prisma = new PrismaClient();
 
@@ -52,15 +53,14 @@ async function main() {
     entites[e.code] = created.id;
   }
 
-  console.log("Seed: catalogue formations…");
+  console.log("Seed: catalogue alternance (TP, CAP, Master)…");
   for (const f of CATALOGUE) {
-    // Montant par défaut selon le type si pas spécifié
+    if (f.entiteCode === "ALIOS") continue; // les formations ALIOS arrivent ci-dessous
     const montantDefaut = f.montant ?? (
       f.type === "Master" ? 9500 :
       f.type === "Titre Professionnel" && f.dureeMois && f.dureeMois >= 18 ? 8500 :
       f.type === "Titre Professionnel" ? 7500 :
       f.type === "CAP" ? 6500 :
-      f.type === "Formation continue" ? 1490 :
       6000
     );
     await prisma.formation.create({
@@ -74,7 +74,28 @@ async function main() {
         dureeMois: f.dureeMois,
         montant: montantDefaut,
         entiteId: entites[f.entiteCode],
-        financements: "OPCO, CPF, France Travail, employeur",
+        domaine: "alternance",
+        financements: "OPCO, employeur, apprentissage",
+      },
+    });
+  }
+
+  console.log("Seed: 120 formations continues ALIOS (sans entité)…");
+  for (const f of ALIOS_FORMATIONS) {
+    const domaineLib = DOMAINES_ALIOS.find((d) => d.id === f.domaine)?.nom ?? f.domaine;
+    await prisma.formation.create({
+      data: {
+        intitule: f.intitule,
+        niveau: "Sans niveau",
+        type: "Formation continue",
+        voieAcces: "Formation continue (CPF, OPCO, France Travail, sur-mesure)",
+        secteurs: domaineLib,
+        dureeMois: 1,
+        montant: prixDefaut(f.domaine),
+        entiteId: null,
+        domaine: f.domaine,
+        codeRS: f.certification,
+        financements: f.financements.join(", "),
       },
     });
   }
@@ -82,7 +103,7 @@ async function main() {
   console.log("Seed: candidats de démonstration…");
   const formations = await prisma.formation.findMany();
   const fByCode = (code: string, level?: string) =>
-    formations.find((f) => f.entiteId === entites[code] && (!level || f.niveau.includes(level)));
+    formations.find((f) => f.entiteId != null && f.entiteId === entites[code] && (!level || f.niveau.includes(level)));
 
   const demoCandidats = [
     { prenom: "Léa",     nom: "Martin",    persona: "C1", entite: "PBA",   formation: fByCode("PBA"),   etape: 3,  ville: "Paris" },

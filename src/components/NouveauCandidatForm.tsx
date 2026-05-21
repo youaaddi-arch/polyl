@@ -13,10 +13,11 @@ import {
   financementsSuggeres,
   NIVEAUX_ANGLAIS,
   MOBILITE_GEO,
+  PRESCRIPTEURS,
 } from "@/lib/options";
 
 type EntiteOpt = { id: string; code: string; specialite: string };
-type FormationOpt = { id: string; intitule: string; niveau: string; type: string; entiteCode: string; montant?: number | null };
+type FormationOpt = { id: string; intitule: string; niveau: string; type: string; entiteCode: string | null; domaine?: string | null; montant?: number | null };
 type EntrepriseOpt = { id: string; raisonSociale: string };
 
 export default function NouveauCandidatForm({
@@ -28,6 +29,7 @@ export default function NouveauCandidatForm({
   formations: FormationOpt[];
   entreprises: EntrepriseOpt[];
 }) {
+  // États conditionnels
   const [source, setSource] = useState<string>("");
   const [statutPro, setStatutPro] = useState<string>("");
   const [reconversion, setReconversion] = useState<boolean>(false);
@@ -38,6 +40,7 @@ export default function NouveauCandidatForm({
   const sourceIsATS = SOURCES_ATS.includes(source);
   const isSalarie = statutPro === "salarie";
 
+  // Auto-suggestion du financement selon le statut + reconversion
   const finSuggCodes = financementsSuggeres(statutPro || null, reconversion);
   const financementsTriees = useMemo(() => {
     const sugg = FINANCEMENTS.filter((f) => finSuggCodes.includes(f.code));
@@ -45,6 +48,7 @@ export default function NouveauCandidatForm({
     return { sugg, autres };
   }, [statutPro, reconversion]);
 
+  // Montant auto-rempli depuis la formation
   const formation = formations.find((f) => f.id === formationId);
   const montantAuto = formation?.montant ?? null;
   const montantAffiche = formationManuelle ? montantSaisi : (montantAuto?.toString() ?? "");
@@ -57,6 +61,7 @@ export default function NouveauCandidatForm({
 
       <form action={creerCandidat} className="space-y-6">
 
+        {/* IDENTITÉ */}
         <section className="card p-6 space-y-4">
           <h2 className="font-semibold border-b border-hubspot-border pb-2">👤 Identité</h2>
           <div className="grid grid-cols-2 gap-4">
@@ -74,6 +79,7 @@ export default function NouveauCandidatForm({
           </div>
         </section>
 
+        {/* COORDONNÉES */}
         <section className="card p-6 space-y-4">
           <h2 className="font-semibold border-b border-hubspot-border pb-2">📞 Coordonnées</h2>
           <div className="grid grid-cols-2 gap-4">
@@ -90,11 +96,18 @@ export default function NouveauCandidatForm({
           </div>
         </section>
 
+        {/* SOURCE */}
         <section className="card p-6 space-y-4">
           <h2 className="font-semibold border-b border-hubspot-border pb-2">📥 Source de la candidature</h2>
           <label className="block">
             <span className="block text-sm font-medium text-hubspot-text mb-1">Source d'entrée *</span>
-            <select name="sourceEntree" required value={source} onChange={(e) => setSource(e.target.value)} className="w-full rounded border border-hubspot-border px-3 py-2 bg-white text-sm">
+            <select
+              name="sourceEntree"
+              required
+              value={source}
+              onChange={(e) => setSource(e.target.value)}
+              className="w-full rounded border border-hubspot-border px-3 py-2 bg-white text-sm"
+            >
               <option value="">— Choisir —</option>
               <optgroup label="Sites d'emploi (auto-remplissage)">
                 {SOURCES_ENTREE.filter((s) => s.type === "ats").map((s) => <option key={s.code} value={s.code}>{s.libelle}</option>)}
@@ -114,12 +127,13 @@ export default function NouveauCandidatForm({
             </select>
           </label>
 
+          {/* Champs supplémentaires si source = ATS (Indeed, HelloWork, LBA, France Travail, LinkedIn) */}
           {sourceIsATS && (
             <div className="bg-blue-50 border border-blue-200 rounded p-4 space-y-3">
               <p className="text-xs font-semibold text-blue-900">📡 Candidature externe — ces champs seront remontés automatiquement par l'API à terme</p>
               <div className="grid grid-cols-2 gap-4">
                 <Field label="Date de candidature" name="dateCandidature" type="date" defaultValue={new Date().toISOString().slice(0, 10)} />
-                <Field label="Poste visé" name="posteVise" placeholder="ex : Alternant·e commercial·e" />
+                <Field label="Poste visé (intitulé du job)" name="posteVise" placeholder="ex : Alternant·e commercial·e" />
                 <Field label="Formation souhaitée (texte libre)" name="formationSouhaiteeLibre" placeholder="ex : Bachelor Commerce" />
                 <Field label="URL du CV" name="cv" placeholder="https://..." />
               </div>
@@ -128,16 +142,24 @@ export default function NouveauCandidatForm({
           )}
         </section>
 
+        {/* STATUT PROFESSIONNEL */}
         <section className="card p-6 space-y-4">
           <h2 className="font-semibold border-b border-hubspot-border pb-2">💼 Statut professionnel</h2>
           <label className="block">
             <span className="block text-sm font-medium text-hubspot-text mb-1">Statut actuel *</span>
-            <select name="statutPro" required value={statutPro} onChange={(e) => setStatutPro(e.target.value)} className="w-full rounded border border-hubspot-border px-3 py-2 bg-white text-sm">
+            <select
+              name="statutPro"
+              required
+              value={statutPro}
+              onChange={(e) => setStatutPro(e.target.value)}
+              className="w-full rounded border border-hubspot-border px-3 py-2 bg-white text-sm"
+            >
               <option value="">— Choisir —</option>
               {STATUTS_PRO.map((s) => <option key={s.code} value={s.code}>{s.libelle}</option>)}
             </select>
           </label>
 
+          {/* Si SALARIÉ → ancienneté */}
           {isSalarie && (
             <div className="bg-amber-50 border border-amber-200 rounded p-4 space-y-3">
               <label className="block">
@@ -150,9 +172,17 @@ export default function NouveauCandidatForm({
             </div>
           )}
 
+          {/* Reconversion ? */}
           {statutPro && (
             <label className="flex items-center gap-2 cursor-pointer">
-              <input type="checkbox" name="reconversion" value="true" checked={reconversion} onChange={(e) => setReconversion(e.target.checked)} className="w-4 h-4 accent-hubspot-orange" />
+              <input
+                type="checkbox"
+                name="reconversion"
+                value="true"
+                checked={reconversion}
+                onChange={(e) => setReconversion(e.target.checked)}
+                className="w-4 h-4 accent-hubspot-orange"
+              />
               <span className="text-sm">📚 Cette formation s'inscrit dans une <strong>reconversion professionnelle</strong></span>
             </label>
           )}
@@ -160,34 +190,49 @@ export default function NouveauCandidatForm({
           {reconversion && isSalarie && (
             <div className="bg-emerald-50 border border-emerald-200 rounded p-3 text-sm">
               💡 <strong>Financement recommandé : CPF de Transition Professionnelle (PTP)</strong>
-              <br /><span className="text-xs text-hubspot-text-muted">Permet de financer une formation longue avec maintien du salaire.</span>
+              <br /><span className="text-xs text-hubspot-text-muted">Permet de financer une formation longue avec maintien du salaire pendant la formation.</span>
             </div>
           )}
         </section>
 
+        {/* FORMATION */}
         <section className="card p-6 space-y-4">
           <h2 className="font-semibold border-b border-hubspot-border pb-2">📚 Formation visée</h2>
 
           <label className="flex items-center gap-2 cursor-pointer">
-            <input type="checkbox" checked={formationManuelle} onChange={(e) => { setFormationManuelle(e.target.checked); if (e.target.checked) setFormationId(""); }} className="w-4 h-4 accent-hubspot-orange" />
+            <input
+              type="checkbox"
+              checked={formationManuelle}
+              onChange={(e) => { setFormationManuelle(e.target.checked); if (e.target.checked) setFormationId(""); }}
+              className="w-4 h-4 accent-hubspot-orange"
+            />
             <span className="text-sm">La formation visée n'est <strong>pas dans le catalogue</strong> — saisir manuellement</span>
           </label>
 
           {!formationManuelle ? (
             <div className="grid grid-cols-2 gap-4">
-              <Select label="Centre / Entité" name="entiteId" options={[{ value: "", label: "—" }, ...entites.map((e) => ({ value: e.id, label: `${e.code} — ${e.specialite}` }))]} />
+              <Select
+                label="Centre / Entité"
+                name="entiteId"
+                options={[{ value: "", label: "—" }, ...entites.map((e) => ({ value: e.id, label: `${e.code} — ${e.specialite}` }))]}
+              />
               <label className="block">
                 <span className="block text-sm font-medium text-hubspot-text mb-1">Formation</span>
-                <select name="formationId" value={formationId} onChange={(e) => setFormationId(e.target.value)} className="w-full rounded border border-hubspot-border px-3 py-2 bg-white text-sm">
+                <select
+                  name="formationId"
+                  value={formationId}
+                  onChange={(e) => setFormationId(e.target.value)}
+                  className="w-full rounded border border-hubspot-border px-3 py-2 bg-white text-sm"
+                >
                   <option value="">— Choisir —</option>
-                  <optgroup label="Apprentissage / Alternance">
+                  <optgroup label="Apprentissage / Alternance (Titre Pro, CAP, Master)">
                     {formations.filter((f) => f.type !== "Formation continue").map((f) => (
-                      <option key={f.id} value={f.id}>{f.intitule} — {f.entiteCode}</option>
+                      <option key={f.id} value={f.id}>{f.intitule}{f.entiteCode ? ` — ${f.entiteCode}` : ""}</option>
                     ))}
                   </optgroup>
-                  <optgroup label="Formation continue (ALIOS, courte durée)">
+                  <optgroup label="Formation continue ALIOS (120 formations, courte durée)">
                     {formations.filter((f) => f.type === "Formation continue").map((f) => (
-                      <option key={f.id} value={f.id}>{f.intitule} — {f.entiteCode}</option>
+                      <option key={f.id} value={f.id}>{f.intitule}{f.domaine ? ` · ${f.domaine}` : ""}</option>
                     ))}
                   </optgroup>
                 </select>
@@ -204,18 +249,30 @@ export default function NouveauCandidatForm({
               <p className="text-xs font-semibold text-orange-900">📝 Saisie manuelle (formation hors catalogue)</p>
               <Field label="Intitulé de la formation *" name="formationManuelleNom" required={formationManuelle} placeholder="ex : Bachelor Marketing Digital — XYZ School" />
               <div className="grid grid-cols-2 gap-3">
-                <Select label="Niveau" name="formationManuelleNiveau" options={[
-                  { value: "", label: "—" },
-                  { value: "Sans niveau", label: "Sans niveau" },
-                  { value: "Niveau 3 (CAP/BEP)", label: "Niveau 3 (CAP/BEP)" },
-                  { value: "Niveau 4 (Bac)", label: "Niveau 4 (Bac)" },
-                  { value: "Niveau 5 (Bac+2)", label: "Niveau 5 (Bac+2)" },
-                  { value: "Niveau 6 (Bac+3/4)", label: "Niveau 6 (Bac+3/4)" },
-                  { value: "Niveau 7 (Bac+5)", label: "Niveau 7 (Bac+5)" },
-                ]} />
+                <Select
+                  label="Niveau"
+                  name="formationManuelleNiveau"
+                  options={[
+                    { value: "", label: "—" },
+                    { value: "Sans niveau", label: "Sans niveau" },
+                    { value: "Niveau 3 (CAP/BEP)", label: "Niveau 3 (CAP/BEP)" },
+                    { value: "Niveau 4 (Bac)", label: "Niveau 4 (Bac)" },
+                    { value: "Niveau 5 (Bac+2)", label: "Niveau 5 (Bac+2)" },
+                    { value: "Niveau 6 (Bac+3/4)", label: "Niveau 6 (Bac+3/4)" },
+                    { value: "Niveau 7 (Bac+5)", label: "Niveau 7 (Bac+5)" },
+                  ]}
+                />
                 <label className="block">
                   <span className="block text-sm font-medium text-hubspot-text mb-1">Montant à saisir (€) *</span>
-                  <input name="montantFinancement" type="number" value={montantSaisi} onChange={(e) => setMontantSaisi(e.target.value)} required={formationManuelle} placeholder="ex : 4500" className="w-full rounded border border-hubspot-border px-3 py-2 text-sm" />
+                  <input
+                    name="montantFinancement"
+                    type="number"
+                    value={montantSaisi}
+                    onChange={(e) => setMontantSaisi(e.target.value)}
+                    required={formationManuelle}
+                    placeholder="ex : 4500"
+                    className="w-full rounded border border-hubspot-border px-3 py-2 text-sm"
+                  />
                 </label>
               </div>
             </div>
@@ -229,6 +286,7 @@ export default function NouveauCandidatForm({
           </div>
         </section>
 
+        {/* FINANCEMENT */}
         <section className="card p-6 space-y-4">
           <h2 className="font-semibold border-b border-hubspot-border pb-2">💰 Type de financement souhaité</h2>
 
@@ -254,6 +312,7 @@ export default function NouveauCandidatForm({
             </select>
           </label>
 
+          {/* Affichage du montant */}
           {montantAffiche && (
             <div className="bg-hubspot-bg-alt rounded p-3 text-sm">
               💶 Montant : <strong>{Number(montantAffiche).toLocaleString("fr-FR")} €</strong>
@@ -267,11 +326,13 @@ export default function NouveauCandidatForm({
           </div>
         </section>
 
+        {/* SOCIÉTÉ MATCHÉE (apprentissage) */}
         <section className="card p-6 space-y-4">
           <h2 className="font-semibold border-b border-hubspot-border pb-2">🏢 Société matchée (si apprentissage)</h2>
           <Select label="Entreprise proposée / matchée" name="societeMatcheeId" options={[{ value: "", label: "— pas encore matché —" }, ...entreprises.map((e) => ({ value: e.id, label: e.raisonSociale }))]} />
         </section>
 
+        {/* MOBILITÉ */}
         <section className="card p-6 space-y-4">
           <h2 className="font-semibold border-b border-hubspot-border pb-2">🚗 Mobilité & compétences</h2>
           <div className="grid grid-cols-2 gap-4">
@@ -283,6 +344,7 @@ export default function NouveauCandidatForm({
           </div>
         </section>
 
+        {/* SUIVI */}
         <section className="card p-6 space-y-4">
           <h2 className="font-semibold border-b border-hubspot-border pb-2">📋 Suivi commercial</h2>
           <p className="text-xs text-hubspot-text-muted">Le commercial sera automatiquement affecté selon l'entité ou la disponibilité de l'équipe.</p>
@@ -292,6 +354,7 @@ export default function NouveauCandidatForm({
           </label>
         </section>
 
+        {/* RGPD */}
         <section className="card p-6 space-y-3">
           <h2 className="font-semibold border-b border-hubspot-border pb-2">🔒 Consentements RGPD</h2>
           <Checkbox label="Consentement RGPD général" name="consentRgpd" defaultChecked />
@@ -313,7 +376,14 @@ function Field({ label, name, type = "text", required, placeholder, defaultValue
   return (
     <label className="block">
       <span className="block text-sm font-medium text-hubspot-text mb-1">{label}</span>
-      <input name={name} type={type} required={required} placeholder={placeholder} defaultValue={defaultValue} className="w-full rounded border border-hubspot-border px-3 py-2 text-sm focus:border-hubspot-orange focus:ring-1 focus:ring-hubspot-orange outline-none" />
+      <input
+        name={name}
+        type={type}
+        required={required}
+        placeholder={placeholder}
+        defaultValue={defaultValue}
+        className="w-full rounded border border-hubspot-border px-3 py-2 text-sm focus:border-hubspot-orange focus:ring-1 focus:ring-hubspot-orange outline-none"
+      />
     </label>
   );
 }

@@ -164,6 +164,8 @@ export async function importerCSV(formData: FormData) {
   const file = formData.get("fichier") as File | null;
   if (!file) throw new Error("Fichier obligatoire");
 
+  if (objet === "alternance") return importerAlternance(file);
+
   const ext = file.name.toLowerCase().split(".").pop() ?? "";
   const isExcel = ext === "xlsx" || ext === "xls" || file.type.includes("spreadsheet");
   const { headers, rows } = isExcel ? await parseXLSX(file) : parseCSV(await file.text());
@@ -235,4 +237,232 @@ export async function importerCSV(formData: FormData) {
 
   revalidatePath("/imports");
   revalidatePath(`/${objet}`);
+}
+
+// ============================================================
+// IMPORT CONTRATS ALTERNANCE
+// Chaque ligne = candidat + entreprise + tuteur + contrat
+// Détecte les colonnes par position autour de "ENTREPRISE" / "NOM TUTEUR"
+// ============================================================
+function normSiret(v: string): string | null {
+  const digits = v.replace(/\D/g, "");
+  return digits.length === 14 ? digits : digits.length > 0 && digits.length <= 14 ? digits.padStart(14, "0") : null;
+}
+
+function parseDate(v: string): Date | null {
+  if (!v) return null;
+  const d = new Date(v);
+  if (Number.isFinite(d.getTime()) && d.getFullYear() > 1950 && d.getFullYear() < 2100) return d;
+  // Format dd/mm/yyyy
+  const m = v.match(/^(\d{1,2})[\/\-](\d{1,2})[\/\-](\d{2,4})/);
+  if (m) {
+    const yr = m[3].length === 2 ? 2000 + Number(m[3]) : Number(m[3]);
+    const dt = new Date(yr, Number(m[2]) - 1, Number(m[1]));
+    return Number.isFinite(dt.getTime()) ? dt : null;
+  }
+  return null;
+}
+
+async function importerAlternance(file: File) {
+  const ext = file.name.toLowerCase().split(".").pop() ?? "";
+  const isExcel = ext === "xlsx" || ext === "xls" || file.type.includes("spreadsheet");
+  const { headers, rows } = isExcel ? await parseXLSX(file) : parseCSV(await file.text());
+  if (rows.length === 0) throw new Error("Fichier vide ou invalide");
+
+  // Détection des bornes via les titres-clés
+  const norm = (s: string) => normalize(s);
+  const idxEntreprise = headers.findIndex((h) => norm(h) === "entreprise");
+  const idxTuteur = headers.findIndex((h) => norm(h).includes("nom tuteur"));
+  const idxSiret = headers.findIndex((h) => norm(h) === "siret");
+  const idxNom = headers.findIndex((h) => norm(h) === "nom");
+  const idxPrenom = headers.findIndex((h) => norm(h) === "prenom" || norm(h) === "prénom");
+  const idxStatut = headers.findIndex((h) => norm(h) === "statut");
+  const idxOpcoDossier = headers.findIndex((h) => norm(h).includes("dossier opco"));
+  const idxNumSecu = headers.findIndex((h) => norm(h).includes("num secu stagiaire"));
+  const idxDernierDiplome = headers.findIndex((h) => norm(h).includes("dernier dipl"));
+  const idxDateFormation = headers.findIndex((h) => norm(h).includes("date demarrage formation"));
+  const idxDateEnvoi = headers.findIndex((h) => norm(h).includes("envoi contrat"));
+  const idxDateRetour = headers.findIndex((h) => norm(h).includes("retour contrat"));
+  const idxDateContrat = headers.findIndex((h) => norm(h).includes("date demarrage contrat"));
+  const idxOpcoEnt = headers.findIndex((h) => norm(h) === "opco");
+  const idxContratUrl = headers.findIndex((h) => norm(h) === "contrats");
+
+  if (idxEntreprise < 0 || idxNom < 0 || idxPrenom < 0) {
+    throw new Error("Colonnes minimales manquantes (NOM, Prenom, ENTREPRISE)");
+  }
+
+  // Sous-colonnes candidat : recherche dans [0, idxEntreprise[
+  const findIn = (re: RegExp, from = 0, to = headers.length) => {
+    for (let i = from; i < to; i++) if (re.test(norm(headers[i]))) return i;
+    return -1;
+  };
+  const idxTelCand = findIn(/^tel$/, 0, idxEntreprise);
+  const idxMailCand = findIn(/^mail$/, 0, idxEntreprise);
+  const idxAdrCand = findIn(/^adresse$/, 0, idxEntreprise);
+  const idxVilleCand = findIn(/^ville$/, 0, idxEntreprise);
+  const idxDateNaiss = idxMailCand >= 0 ? idxMailCand + 1 : -1; // date naissance = col après mail
+
+  // Sous-colonnes entreprise : entre idxEntreprise et idxTuteur (exclu)
+  const limitEnt = idxTuteur >= 0 ? idxTuteur : headers.length;
+  const idxTelEnt = findIn(/^tel$/, idxEntreprise, limitEnt);
+  const idxMailEnt = findIn(/^mail$/, idxEntreprise, limitEnt);
+  const idxAdrEnt = findIn(/^adresse$/, idxEntreprise, limitEnt);
+  const idxVilleEnt = findIn(/^ville$/, idxEntreprise, limitEnt);
+
+  // Tuteur
+  const idxPrenomTut = findIn(/prenom tut|^prenom$/, idxTuteur, headers.length);
+  const idxMailTut = findIn(/mail tuteur|^mail$/, idxTuteur, headers.length);
+
+  let candidatsCrees = 0, entreprisesCreees = 0, contactsCrees = 0, contratsCrees = 0, erreurs = 0;
+  const entrepriseCache = new Map<string, string>();
+
+  const STATUT_MAP: Record<string, string> = {
+    "accorde": "actif", "accordé": "actif",
+    "rupture": "termine",
+    "solde": "termine", "soldé": "termine",
+    "envoye": "envoye", "envoyé": "envoye",
+    "signe": "signe", "signé": "signe",
+  };
+
+  const get = (row: string[], i: number): string => (i >= 0 ? (row[i] ?? "").toString().trim() : "");
+
+  for (const row of rows) {
+    try {
+      const nom = get(row, idxNom);
+      const prenom = get(row, idxPrenom);
+      const raison = get(row, idxEntreprise);
+      if (!nom || !prenom || !raison) { erreurs++; continue; }
+
+      const siret = normSiret(get(row, idxSiret));
+      const cacheKey = siret ?? raison.toLowerCase().trim();
+      let entrepriseId = entrepriseCache.get(cacheKey);
+      if (!entrepriseId) {
+        const existante = siret ? await prisma.entreprise.findFirst({ where: { siret } }) : await prisma.entreprise.findFirst({ where: { raisonSociale: raison } });
+        if (existante) {
+          entrepriseId = existante.id;
+        } else {
+          const e = await prisma.entreprise.create({
+            data: {
+              raisonSociale: raison,
+              siret: siret ?? undefined,
+              siren: siret?.substring(0, 9),
+              opcoRattache: get(row, idxOpcoEnt) || null,
+              adresse: get(row, idxAdrEnt) || null,
+              ville: get(row, idxVilleEnt) || null,
+              telephoneStandard: get(row, idxTelEnt) || null,
+              email: get(row, idxMailEnt) || null,
+              statut: "partenaire_actif",
+              etapePipeline: 15,
+              sourceDetection: "Import alternance",
+              accordOPCO: true,
+              rechercheAlternants: true,
+              derniereActivite: new Date(),
+            },
+          });
+          entrepriseId = e.id;
+          entreprisesCreees++;
+        }
+        entrepriseCache.set(cacheKey, entrepriseId);
+      }
+
+      const dateNaiss = parseDate(get(row, idxDateNaiss));
+      const dateFormation = parseDate(get(row, idxDateFormation));
+      const numSecu = get(row, idxNumSecu);
+      const statutRaw = get(row, idxStatut).toLowerCase();
+      const statutContrat = STATUT_MAP[statutRaw] ?? "brouillon";
+
+      const candidat = await prisma.candidat.create({
+        data: {
+          nom,
+          prenom,
+          telephone: get(row, idxTelCand) || null,
+          email: get(row, idxMailCand) || null,
+          adresse: get(row, idxAdrCand) || null,
+          ville: get(row, idxVilleCand) || null,
+          dateNaissance: dateNaiss,
+          diplomeActuel: get(row, idxDernierDiplome) || null,
+          numeroDossierOpco: get(row, idxOpcoDossier) || null,
+          societeMatcheeId: entrepriseId,
+          sourceEntree: "Import alternance PNBS",
+          statutLead: statutRaw === "accorde" || statutRaw === "accordé" ? "client" : statutRaw === "rupture" ? "perdu" : "chaud",
+          scoreLead: 100,
+          etapePipeline: statutRaw === "accorde" || statutRaw === "accordé" ? 9 : 6,
+          statut: statutRaw === "rupture" ? "perdu" : "place",
+          typeContratSouhaite: "apprentissage",
+          dateCandidature: dateFormation ?? new Date(),
+          derniereActivite: new Date(),
+          notes: numSecu ? `N° SS : ${numSecu}` : undefined,
+          consentRgpd: true,
+        },
+      });
+      candidatsCrees++;
+
+      const nomTut = get(row, idxTuteur);
+      const prenomTut = get(row, idxPrenomTut);
+      const mailTut = get(row, idxMailTut);
+      let contactId: string | null = null;
+      if (nomTut) {
+        const c = await prisma.contact.create({
+          data: {
+            nom: nomTut,
+            prenom: prenomTut || "—",
+            email: mailTut || null,
+            fonction: "Maître d'apprentissage",
+            estMaitreApp: true,
+            entrepriseId,
+          },
+        });
+        contactId = c.id;
+        contactsCrees++;
+      }
+
+      const dateDebut = parseDate(get(row, idxDateContrat)) ?? dateFormation ?? new Date();
+      const dateFin = new Date(dateDebut);
+      dateFin.setMonth(dateFin.getMonth() + 12);
+      await prisma.contrat.create({
+        data: {
+          type: "apprentissage",
+          dateDebut,
+          dateFin,
+          opco: get(row, idxOpcoEnt) || null,
+          numeroCERFA: get(row, idxOpcoDossier) || null,
+          statut: statutContrat,
+          candidatId: candidat.id,
+          entrepriseId,
+          maitreAppContactId: contactId ?? undefined,
+        },
+      });
+      contratsCrees++;
+
+      const urlDrive = get(row, idxContratUrl);
+      await prisma.activite.create({
+        data: {
+          type: "document",
+          titre: `Contrat alternance ${statutRaw.toUpperCase() || "importé"} — ${raison}`,
+          contenu: urlDrive ? `Lien Drive du contrat : ${urlDrive}` : null,
+          auteur: "Import alternance",
+          candidatId: candidat.id,
+          entrepriseId,
+        },
+      });
+    } catch (e) {
+      erreurs++;
+    }
+  }
+
+  await prisma.importLog.create({
+    data: {
+      objet: "alternance",
+      nomFichier: file.name,
+      nbLignes: rows.length,
+      nbCrees: candidatsCrees,
+      nbErreurs: erreurs,
+      statut: "termine",
+      detail: `${candidatsCrees} candidats · ${entreprisesCreees} entreprises · ${contactsCrees} tuteurs · ${contratsCrees} contrats`,
+    } as any,
+  });
+
+  revalidatePath("/imports");
+  revalidatePath("/candidats");
+  revalidatePath("/entreprises");
 }

@@ -21,6 +21,7 @@ export default async function ImportsPage() {
               <select name="objet" className="w-full rounded-lg border border-gray-300 px-3 py-2 bg-white">
                 <option value="candidats">Candidats</option>
                 <option value="entreprises">Entreprises</option>
+                <option value="alternance">📑 Contrats alternance (apprenti + entreprise + tuteur)</option>
               </select>
             </label>
             <label className="block">
@@ -30,6 +31,7 @@ export default async function ImportsPage() {
             <p className="text-xs text-gray-500">
               Format candidats : <code>prenom, nom, email, telephone, ville…</code><br />
               Format entreprises : <code>raisonSociale, siret, secteur, ville, taille…</code><br />
+              Format alternance : <code>NOM, Prenom, STATUT, TEL, MAIL, ADRESSE, VILLE, ENTREPRISE, SIRET, OPCO, NOM TUTEUR…</code> — découpé en 4 objets / ligne, dédupe entreprise par SIRET<br />
               <span className="text-emerald-600">✓ Excel (.xlsx) supporté — première feuille uniquement</span>
             </p>
             <button className="btn-primary w-full justify-center">Importer</button>

@@ -1,7 +1,4 @@
 // CRM Formation - Schéma de données
-// Couvre les entités du CDC V2.0 (section 5.2) :
-// Candidat, Entreprise, Contact, Formation, OffreAlternance,
-// ActionFormation, Contrat, Tache, Evenement, Document, Veille.
 
 generator client {
   provider = "prisma-client-js"
@@ -12,12 +9,9 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-// ============================================================
-// ENTITÉ DU GROUPE (PNFF, DBS, PNBS, ORCEA, PNFB, PBA)
-// ============================================================
 model Entite {
   id          String       @id @default(cuid())
-  code        String       @unique // PNFF, DBS, ...
+  code        String       @unique
   nom         String
   specialite  String
   ville       String
@@ -29,32 +23,32 @@ model Entite {
   updatedAt   DateTime     @updatedAt
 }
 
-// ============================================================
-// FICHE PRODUIT FORMATION (CDC section 5.3)
-// ============================================================
 model Formation {
   id                   String  @id @default(cuid())
   intitule             String
   codeRNCP             String?
-  niveau               String // "Niveau 3 (CAP)", "Niveau 4 (Bac)", ...
-  type                 String // "Titre Professionnel", "CAP", "Master"
-  voieAcces            String // "Apprentissage & Formation continue"
-  montant              Float?  // prix moyen de la formation (€) — sert à auto-remplir le devis
+  niveau               String
+  type                 String
+  voieAcces            String
+  montant              Float?
   dureeMois            Int?
-  rythme               String? // ex : "2 sem école / 3 sem entreprise"
-  secteurs             String? // CSV des secteurs cibles
-  metiers              String? // CSV des métiers visés
+  rythme               String?
+  secteurs             String?
+  metiers              String?
   competences          String?
   debouches            String?
   prerequis            String?
-  financements         String? // OPCO, CPF, France Travail, employeur
+  financements         String?
   aidesEmployeur       String?
   tauxReussite         Float?
   tauxInsertion        Float?
   argumentsCommerciaux String?
 
-  entiteId String
-  entite   Entite @relation(fields: [entiteId], references: [id])
+  entiteId String?
+  entite   Entite? @relation(fields: [entiteId], references: [id])
+
+  domaine  String?
+  codeRS   String?
 
   candidats Candidat[]
   actions   ActionFormation[]
@@ -65,9 +59,6 @@ model Formation {
   updatedAt DateTime @updatedAt
 }
 
-// ============================================================
-// CANDIDAT (CDC section 6 - pipeline 19 étapes)
-// ============================================================
 model Candidat {
   id            String    @id @default(cuid())
   nom           String
@@ -81,70 +72,60 @@ model Candidat {
   pays          String?   @default("France")
   dateNaissance DateTime?
   age           Int?
-  genre         String?   // homme, femme, autre
+  genre         String?
   nationalite   String?
 
-  // Source & qualification
-  sourceEntree     String?    // ATS, formulaire web, prescription, ...
-  prescripteur     String?    // France Travail, Mission Locale, Cap Emploi, recommandation, ...
+  sourceEntree     String?
+  prescripteur     String?
   dateCandidature  DateTime?
   derniereActivite DateTime?
-  statutLead       String?    @default("froid")  // froid, tiede, chaud, mql, sql, client, perdu
-  scoreLead        Int?       @default(0)  // 0-100
-  persona          String?    // C1, C2, C3
+  statutLead       String?    @default("froid")
+  scoreLead        Int?       @default(0)
+  persona          String?
 
-  // Pipeline candidat (parcours pédagogique - 19 étapes du CDC)
   etapePipeline Int    @default(1)
   statut        String @default("nouveau")
 
-  // Tests et évaluations
   scorePositionnement Int?
   bilanPositionnement String?
   ficheAdaptation     String?
   motivationNote      Int?
 
-  // Formation visée
   formationId      String?
   formation        Formation? @relation(fields: [formationId], references: [id])
-  niveauActuel     String?    // CAP, Bac, Bac+2, Bac+5, ...
+  niveauActuel     String?
   niveauVise       String?
-  situation        String?    // étudiant, salarié, demandeur emploi, ...
+  situation        String?
   experiencePro    String?
   diplomeActuel    String?
   anneeBac         Int?
 
-  // Financement
-  statutPro            String?  // demandeur_emploi, salarie, sans_activite, auto_entrepreneur, etudiant
-  ancienneteSalarie    String?  // "moins 6 mois", "6-12 mois", "1-3 ans", "+3 ans"
+  statutPro            String?
+  ancienneteSalarie    String?
   reconversion         Boolean? @default(false)
-  financementChoisi    String?  // CPF, CPF Transition, OPCO, France Travail, POEI, AIF, AFPR, Plan dev compétences, Personnel
+  financementChoisi    String?
   montantFinancement   Float?
   opco                 String?
   numeroDossierOpco    String?
   consentDevis         Boolean? @default(false)
 
-  // Formation hors catalogue (saisie manuelle)
   formationManuelleNom    String?
   formationManuelleNiveau String?
 
-  // Candidature externe (Indeed, HelloWork, LBA, etc.)
   posteVise               String?
   formationSouhaiteeLibre String?
-  apiSource               String?  // indeed, hellowork, labonnealternance, francetravail
-  apiCandidatureId        String?  // ID externe pour dédupe
+  apiSource               String?
+  apiCandidatureId        String?
 
-  // Matching entreprise (apprentissage)
   societeMatcheeId  String?
   societeMatchee    Entreprise? @relation("CandidatSociete", fields: [societeMatcheeId], references: [id])
-  societesProposees String?    // CSV des entreprises proposées
-  typeContratSouhaite String?  // apprentissage, professionnalisation, CDI, CDD
+  societesProposees String?
+  typeContratSouhaite String?
 
-  // Centre / entité
   entiteId String?
   entite   Entite? @relation(fields: [entiteId], references: [id])
 
-  // Mobilité & accessibilité
-  mobiliteGeo  String?  // locale, regionale, nationale
+  mobiliteGeo  String?
   permisB      Boolean? @default(false)
   vehicule     Boolean? @default(false)
   niveauAnglais String?
@@ -152,26 +133,22 @@ model Candidat {
   handicap     Boolean? @default(false)
   rqth         Boolean? @default(false)
 
-  // RGPD & consentements
   consentRgpd       Boolean? @default(false)
   consentNewsletter Boolean? @default(false)
   consentSms        Boolean? @default(false)
   consentAppel      Boolean? @default(false)
 
-  // Suivi commercial
   conseillerDedie String?
   conseillerLead  String?
   dateRelance     DateTime?
 
-  // Réseaux & docs
   linkedinUrl String?
-  cv          String?  // chemin / URL CV
+  cv          String?
   lettreMotivation String?
   pieceIdentite    String?
 
   notes String?
 
-  // Relations
   contrats       Contrat[]
   taches         Tache[]
   documents      Document[]
@@ -187,9 +164,6 @@ model Candidat {
   updatedAt DateTime @updatedAt
 }
 
-// ============================================================
-// ENTREPRISE (CDC section 7 - pipeline 17 étapes)
-// ============================================================
 model Entreprise {
   id             String  @id @default(cuid())
   raisonSociale  String
@@ -199,14 +173,13 @@ model Entreprise {
   codeApe        String?
   numTVA         String?
   formeJuridique String?
-  taille         String? // PME, ETI, GE
+  taille         String?
   effectif       Int?
   chiffreAffaires Float?
   capitalSocial  Float?
   secteur        String?
   secteurDetail  String?
 
-  // Coordonnées
   adresse           String?
   complementAdresse String?
   ville             String?
@@ -217,57 +190,48 @@ model Entreprise {
   siteWeb           String?
   linkedinUrl       String?
 
-  // Adresse de facturation
   adresseFacturation String?
   villeFacturation   String?
   cpFacturation      String?
 
-  persona String? // E1, E2, E3
+  persona String?
 
-  // Pipeline entreprise
   etapePipeline  Int    @default(1)
   statut         String @default("prospect")
   scorePotentiel Int?
   derniereActivite DateTime?
 
-  // Source de détection
   sourceDetection String?
   urlOffre        String?
 
-  // BESOINS DE RECRUTEMENT
   rechercheAlternants      Boolean? @default(false)
   rechercheCDI             Boolean? @default(false)
   rechercheCDD             Boolean? @default(false)
   rechercheStage           Boolean? @default(false)
   rechercheFormationSalaries Boolean? @default(false)
-  typeAlternance           String?  // apprentissage, professionnalisation, both
+  typeAlternance           String?
   nbAlternantsRecherches   Int?
   nbCDIRecherches          Int?
   dateBesoinAlternance     DateTime?
-  niveauxRecherches        String?  // CSV: "Niveau 3, Niveau 4, Niveau 5"
-  metiersRecherches        String?  // CSV des métiers recherchés
+  niveauxRecherches        String?
+  metiersRecherches        String?
 
-  // Conventions / OPCO
   conventionCollective String?
-  opcoRattache         String?  // AKTO, OCAPIAT, ATLAS, ...
+  opcoRattache         String?
   accordOPCO           Boolean? @default(false)
   accordTutorat        Boolean? @default(false)
 
-  // Contacts décisionnaires
   responsableRHNom      String?
   responsableRHEmail    String?
   responsableRHTelephone String?
   dirigeantNom          String?
   dirigeantEmail        String?
 
-  // Commercial
   commercialDedie String?
 
-  // Entité de rattachement
   entiteId String?
   entite   Entite? @relation(fields: [entiteId], references: [id])
 
-  // Relations
   contacts       Contact[]
   offres         OffreAlternance[]
   contrats       Contrat[]
@@ -287,18 +251,14 @@ model Entreprise {
   updatedAt DateTime @updatedAt
 }
 
-// ============================================================
-// CONTACT (personne physique rattachée à une entreprise)
-// ============================================================
 model Contact {
   id                 String  @id @default(cuid())
   prenom             String
   nom                String
   email              String?
   telephone          String?
-  fonction           String? // RH, Dirigeant, Maître d'apprentissage
+  fonction           String?
   estMaitreApp       Boolean @default(false)
-  // CDC : un maître d'apprentissage ne peut encadrer plus de 2 apprentis (limite légale)
   nbApprentisActuels Int     @default(0)
 
   entrepriseId String
@@ -308,9 +268,6 @@ model Contact {
   updatedAt DateTime @updatedAt
 }
 
-// ============================================================
-// OFFRE D'ALTERNANCE (annonce détectée / créée)
-// ============================================================
 model OffreAlternance {
   id            String    @id @default(cuid())
   intitulePoste String
@@ -326,15 +283,12 @@ model OffreAlternance {
   formationId String?
   formation   Formation? @relation(fields: [formationId], references: [id])
 
-  statut String @default("ouverte") // ouverte, pourvue, fermee
+  statut String @default("ouverte")
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 }
 
-// ============================================================
-// ACTION DE FORMATION (instance d'une formation pour un groupe)
-// ============================================================
 model ActionFormation {
   id        String   @id @default(cuid())
   intitule  String
@@ -352,12 +306,9 @@ model ActionFormation {
   updatedAt DateTime @updatedAt
 }
 
-// ============================================================
-// CONTRAT (apprentissage / professionnalisation)
-// ============================================================
 model Contrat {
   id           String   @id @default(cuid())
-  type         String // "apprentissage" | "professionnalisation"
+  type         String
   dateDebut    DateTime
   dateFin      DateTime
   remuneration Float?
@@ -373,24 +324,21 @@ model Contrat {
   actionFormationId String?
   actionFormation   ActionFormation? @relation(fields: [actionFormationId], references: [id])
 
-  maitreAppContactId String? // référence Contact.id (maître d'apprentissage)
+  maitreAppContactId String?
 
-  statut String @default("brouillon") // brouillon, envoye, signe, actif, termine
+  statut String @default("brouillon")
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 }
 
-// ============================================================
-// TÂCHE / ACTIVITÉ (CDC section 5.2 - liée à tout objet)
-// ============================================================
 model Tache {
   id          String    @id @default(cuid())
   titre       String
   description String?
-  type        String // "appel", "email", "document", "rappel"
-  priorite    String    @default("normale") // basse, normale, haute
-  statut      String    @default("a_faire") // a_faire, en_cours, faite, annulee
+  type        String
+  priorite    String    @default("normale")
+  statut      String    @default("a_faire")
   echeance    DateTime?
   assigneA    String?
 
@@ -407,13 +355,10 @@ model Tache {
   updatedAt DateTime @updatedAt
 }
 
-// ============================================================
-// ÉVÉNEMENT (Job Dating, JIC, réunion d'information)
-// ============================================================
 model Evenement {
   id          String   @id @default(cuid())
   titre       String
-  type        String // "job_dating", "jic", "reunion_info"
+  type        String
   date        DateTime
   lieu        String?
   description String?
@@ -428,17 +373,14 @@ model Evenement {
   updatedAt DateTime @updatedAt
 }
 
-// ============================================================
-// DOCUMENT (checklist 21 étapes - CDC section 9)
-// ============================================================
 model Document {
   id         String  @id @default(cuid())
-  numero     Int // 1..21 selon la checklist
-  type       String // ex : "fiche_candidature", "cerfa", ...
+  numero     Int
+  type       String
   nom        String
-  periode    String // "pre_formation", "entree", "pendant", "fin"
-  statut     String  @default("manquant") // manquant, envoye, recu, signe
-  source     String? // CRM ou ERP
+  periode    String
+  statut     String  @default("manquant")
+  source     String?
   urlFichier String?
 
   candidatId String?
@@ -451,13 +393,10 @@ model Document {
   updatedAt DateTime @updatedAt
 }
 
-// ============================================================
-// COMMUNICATION (historique omnicanal - section 10)
-// ============================================================
 model Communication {
   id         String   @id @default(cuid())
-  canal      String // email, sms, whatsapp, telephone, linkedin
-  direction  String // entrant, sortant
+  canal      String
+  direction  String
   sujet      String?
   contenu    String?
   dateAction DateTime @default(now())
@@ -469,33 +408,22 @@ model Communication {
   entreprise   Entreprise? @relation(fields: [entrepriseId], references: [id])
 }
 
-// ============================================================
-// VEILLE RÉGLEMENTAIRE (CDC section 13)
-// ============================================================
 model Veille {
   id              String    @id @default(cuid())
   titre           String
   resume          String?
-  source          String // Légifrance, JO, France Compétences, ...
+  source          String
   urlSource       String?
   theme           String?
-  niveauImpact    String    @default("info") // info, important, critique
+  niveauImpact    String    @default("info")
   datePublication DateTime?
   createdAt       DateTime  @default(now())
 }
 
-// ============================================================
-// DEAL — Pipeline B2B HubSpot-like (opportunité commerciale)
-// Une "deal" = une opportunité de placer 1 ou N candidats
-// chez une entreprise (= contrat potentiel)
-// ============================================================
-// Anciennement "Deal" — désormais une OPPORTUNITÉ = une candidature
-// Un apprenant peut avoir plusieurs opportunités (Bachelor 2026, FC courte 2027, ...)
 model Deal {
   id             String    @id @default(cuid())
   titre          String
-  // TYPE d'opportunité = sélectionne le pipeline associé
-  type           String    @default("apprentissage") // apprentissage | formation_pro | formation_continue
+  type           String    @default("apprentissage")
   montant        Float?
   devise         String    @default("EUR")
   probabilite    Int       @default(50)
@@ -504,7 +432,7 @@ model Deal {
   dateCloture    DateTime?
   dateGagne      DateTime?
   ownerName      String?
-  centreCode     String?  // PNFF, DBS, PNBS, ORCEA, PNFB, PBA
+  centreCode     String?
 
   pipelineId String?
   pipeline   DealPipeline? @relation(fields: [pipelineId], references: [id])
@@ -512,7 +440,6 @@ model Deal {
 
   statut String @default("ouverte")
 
-  // Liens
   entrepriseId String?
   entreprise   Entreprise? @relation(fields: [entrepriseId], references: [id])
   candidatId   String?
@@ -520,7 +447,6 @@ model Deal {
   formationId  String?
   formation    Formation?  @relation(fields: [formationId], references: [id])
 
-  // Champs spécifiques formation pro / FC
   devisEnvoyeLe       DateTime?
   devisValideLe       DateTime?
   financementEnvoyeLe DateTime?
@@ -539,16 +465,12 @@ model Deal {
 model DealPipeline {
   id        String   @id @default(cuid())
   nom       String
-  // Stages stockées en JSON-string : [{cle, libelle, probabilite, ordre}]
   stages    String
   isDefault Boolean  @default(false)
   deals     Deal[]
   createdAt DateTime @default(now())
 }
 
-// ============================================================
-// NOTE — Note libre attachée à un objet (timeline 360°)
-// ============================================================
 model Note {
   id           String      @id @default(cuid())
   contenu      String
@@ -564,18 +486,15 @@ model Note {
   createdAt    DateTime    @default(now())
 }
 
-// ============================================================
-// MEETING — Rendez-vous calendrier
-// ============================================================
 model Meeting {
   id          String   @id @default(cuid())
   titre       String
   description String?
   dateDebut   DateTime
   dateFin     DateTime
-  lieu        String? // adresse ou lien visio
-  type        String   @default("entretien") // entretien, jic, suivi, autre
-  statut      String   @default("planifie") // planifie, realise, annule
+  lieu        String?
+  type        String   @default("entretien")
+  statut      String   @default("planifie")
   ownerName   String?
 
   candidatId   String?
@@ -589,18 +508,15 @@ model Meeting {
   updatedAt DateTime @updatedAt
 }
 
-// ============================================================
-// TICKET — Support / SAV (Service Hub HubSpot)
-// ============================================================
 model Ticket {
   id          String  @id @default(cuid())
   sujet       String
   description String?
-  categorie   String? // pedagogique, administratif, financier, technique
-  priorite    String  @default("normale") // basse, normale, haute, urgente
-  statut      String  @default("nouveau") // nouveau, en_cours, attente_client, resolu, ferme
+  categorie   String?
+  priorite    String  @default("normale")
+  statut      String  @default("nouveau")
   ownerName   String?
-  source      String? // email, formulaire, telephone
+  source      String?
 
   candidatId   String?
   candidat     Candidat?   @relation(fields: [candidatId], references: [id])
@@ -612,17 +528,13 @@ model Ticket {
   updatedAt DateTime @updatedAt
 }
 
-// ============================================================
-// FORMULAIRE — Capture lead public (Marketing Hub)
-// ============================================================
 model Formulaire {
   id          String                 @id @default(cuid())
-  slug        String                 @unique // /f/[slug]
+  slug        String                 @unique
   nom         String
   description String?
-  // Champs en JSON-string : [{cle, libelle, type, required}]
   champs      String
-  cibleObjet  String                 @default("candidat") // candidat | entreprise
+  cibleObjet  String                 @default("candidat")
   entiteId    String?
   formationId String?
   active      Boolean                @default(true)
@@ -635,60 +547,47 @@ model FormulaireSubmission {
   id           String     @id @default(cuid())
   formulaireId String
   formulaire   Formulaire @relation(fields: [formulaireId], references: [id], onDelete: Cascade)
-  donnees      String // JSON-string des réponses
-  candidatId   String? // si converti en candidat
+  donnees      String
+  candidatId   String?
   entrepriseId String?
   createdAt    DateTime   @default(now())
 }
 
-// ============================================================
-// LISTE INTELLIGENTE — Segment sauvegardé
-// ============================================================
 model Liste {
   id          String   @id @default(cuid())
   nom         String
   description String?
-  objet       String // candidat, entreprise, deal, ticket
-  type        String   @default("dynamique") // dynamique (filtres) | statique (membres figés)
-  // Filtres en JSON-string : [{champ, operateur, valeur}]
+  objet       String
+  type        String   @default("dynamique")
   filtres     String
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 }
 
-// ============================================================
-// TEMPLATE EMAIL
-// ============================================================
 model EmailTemplate {
   id        String   @id @default(cuid())
   nom       String
   sujet     String
-  contenu   String // HTML
-  categorie String? // bienvenue, prospection, relance, ...
-  variables String? // CSV des {{variables}} disponibles
+  contenu   String
+  categorie String?
+  variables String?
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 }
 
-// ============================================================
-// PROPRIÉTÉ PERSONNALISÉE — Custom field admin
-// ============================================================
 model PropPersonnalisee {
   id        String   @id @default(cuid())
-  objet     String // candidat | entreprise | deal | ticket
-  cle       String // ex: "niveau_anglais"
-  libelle   String // ex: "Niveau d'anglais"
-  type      String // texte, nombre, date, booleen, select
-  options   String? // CSV pour select
+  objet     String
+  cle       String
+  libelle   String
+  type      String
+  options   String?
   ordre     Int      @default(0)
   createdAt DateTime @default(now())
 
   @@unique([objet, cle])
 }
 
-// ============================================================
-// VALEUR D'UNE PROPRIÉTÉ PERSONNALISÉE (sur un objet)
-// ============================================================
 model PropValeur {
   id        String   @id @default(cuid())
   propCle   String
@@ -700,26 +599,20 @@ model PropValeur {
   @@unique([propCle, objet, objetId])
 }
 
-// ============================================================
-// UTILISATEUR INTERNE (commercial, pédago, admin)
-// ============================================================
 model Utilisateur {
   id         String   @id @default(cuid())
   email      String   @unique
   nom        String
   prenom     String?
-  role       String   @default("commercial") // admin, manager, commercial, pedagogique
-  entiteCode String? // PNFF, DBS, ...
+  role       String   @default("commercial")
+  entiteCode String?
   active     Boolean  @default(true)
   createdAt  DateTime @default(now())
 }
 
-// ============================================================
-// ACTIVITÉ — Journal unifié pour la timeline 360° d'une fiche
-// ============================================================
 model Activite {
   id           String      @id @default(cuid())
-  type         String // changement_etape, email_envoye, appel, note, rdv, document, tache, ...
+  type         String
   titre        String
   contenu      String?
   auteur       String?
@@ -731,15 +624,12 @@ model Activite {
   createdAt    DateTime    @default(now())
 }
 
-// ============================================================
-// WORKFLOW — Automation (si X alors Y)
-// ============================================================
 model Workflow {
   id          String   @id @default(cuid())
   nom         String
   description String?
-  declencheur String   // ex: "candidat.cree", "deal.gagne"
-  objet       String   // candidat, entreprise, deal, ticket
+  declencheur String
+  objet       String
   conditions  String   @default("[]")
   actions     String
   active      Boolean  @default(true)
@@ -749,9 +639,6 @@ model Workflow {
   updatedAt   DateTime @updatedAt
 }
 
-// ============================================================
-// SEQUENCE — Série d'emails échelonnés (cadence)
-// ============================================================
 model Sequence {
   id          String               @id @default(cuid())
   nom         String
@@ -775,9 +662,6 @@ model SequenceEnrollment {
   enrolledAt    DateTime @default(now())
 }
 
-// ============================================================
-// CAMPAIGN — Envoi marketing one-shot vers une liste
-// ============================================================
 model Campaign {
   id              String    @id @default(cuid())
   nom             String
@@ -794,9 +678,6 @@ model Campaign {
   updatedAt       DateTime  @updatedAt
 }
 
-// ============================================================
-// QUOTE / DEVIS
-// ============================================================
 model Quote {
   id           String    @id @default(cuid())
   numero       String    @unique
@@ -815,9 +696,6 @@ model Quote {
   updatedAt    DateTime  @updatedAt
 }
 
-// ============================================================
-// IMPORT LOG — Historique des imports CSV
-// ============================================================
 model ImportLog {
   id         String   @id @default(cuid())
   objet      String
@@ -831,23 +709,19 @@ model ImportLog {
   createdAt  DateTime @default(now())
 }
 
-// ============================================================
-// VAGUE 3 — Settings HubSpot complets
-// ============================================================
-
 model Equipe {
   id          String   @id @default(cuid())
   nom         String
   description String?
   couleur     String?
   entiteCode  String?
-  membres     String?  // CSV des userIds (simplifié)
+  membres     String?
   createdAt   DateTime @default(now())
 }
 
 model Snippet {
   id        String   @id @default(cuid())
-  raccourci String   @unique  // ex: ;merci
+  raccourci String   @unique
   titre     String
   contenu   String
   auteur    String?
@@ -856,9 +730,9 @@ model Snippet {
 
 model AuditLog {
   id        String   @id @default(cuid())
-  acteur    String   // email user
-  action    String   // ex: "modif_candidat", "export_csv", "suppression"
-  objet     String   // ex: "candidat", "deal"
+  acteur    String
+  action    String
+  objet     String
   objetId   String?
   detail    String?
   ip        String?
@@ -868,12 +742,12 @@ model AuditLog {
 
 model Integration {
   id          String   @id @default(cuid())
-  cle         String   @unique  // ex: brevo, yousign, aircall, insee, linkedin, indeed, openai, meta
+  cle         String   @unique
   nom         String
   description String?
-  categorie   String?  // email, signature, telephonie, enrichissement, prospection, ia, social
+  categorie   String?
   active      Boolean  @default(false)
-  config      String?  // JSON-string des clés API masquées
+  config      String?
   derniereSync DateTime?
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt

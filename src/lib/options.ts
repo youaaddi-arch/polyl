@@ -30,6 +30,7 @@ export const NATIONALITES = [
   "Autre",
 ];
 
+// Sources d'entrée standardisées
 export const SOURCES_ENTREE = [
   { code: "indeed",            libelle: "Indeed",                      type: "ats" },
   { code: "hellowork",         libelle: "HelloWork",                   type: "ats" },
@@ -51,8 +52,10 @@ export const SOURCES_ENTREE = [
   { code: "autre",             libelle: "Autre",                       type: "autre" },
 ] as const;
 
+// Codes ATS qui déclenchent l'auto-remplissage poste/CV/formation
 export const SOURCES_ATS = ["indeed", "hellowork", "labonnealternance", "francetravail", "linkedin"];
 
+// Statut professionnel (avant le financement)
 export const STATUTS_PRO = [
   { code: "demandeur_emploi",   libelle: "Demandeur d'emploi" },
   { code: "salarie",            libelle: "Salarié·e" },
@@ -71,29 +74,33 @@ export const ANCIENNETE_SALARIE = [
   "Plus de 5 ans",
 ] as const;
 
+// Financements complets
 export const FINANCEMENTS = [
-  { code: "apprentissage",              libelle: "Apprentissage (OPCO + entreprise)" },
-  { code: "contrat_pro",                libelle: "Contrat de professionnalisation" },
   { code: "cpf",                        libelle: "CPF (Compte Personnel de Formation)" },
-  { code: "cpf_transition_pro",         libelle: "CPF de Transition Professionnelle (PTP)" },
-  { code: "poei",                       libelle: "POEI (Préparation Opérationnelle à l'Emploi Individuelle)" },
+  { code: "france_travail",             libelle: "France Travail" },
   { code: "aif",                        libelle: "AIF (Aide Individuelle à la Formation)" },
+  { code: "poei",                       libelle: "POEI (Préparation Opérationnelle à l'Emploi Individuelle)" },
+  { code: "poec",                       libelle: "POEC (Préparation Opérationnelle à l'Emploi Collective)" },
   { code: "afpr",                       libelle: "AFPR (Action de Formation Préalable au Recrutement)" },
+  { code: "opco",                       libelle: "OPCO (prise en charge employeur)" },
+  { code: "alternance",                 libelle: "Alternance (apprentissage / contrat pro)" },
+  { code: "cpf_transition_pro",         libelle: "Transition Pro (PTP — CPF de Transition Professionnelle)" },
+  { code: "faf",                        libelle: "FAF (Fonds d'Assurance Formation — indépendants)" },
+  { code: "region",                     libelle: "Aides régionales (Conseil régional)" },
+  { code: "agefiph",                    libelle: "AGEFIPH (travailleurs handicapés)" },
   { code: "plan_dev_competences",       libelle: "Plan de développement des compétences (employeur)" },
   { code: "vae",                        libelle: "VAE (Validation des Acquis de l'Expérience)" },
-  { code: "agefiph",                    libelle: "AGEFIPH (travailleurs handicapés)" },
-  { code: "region",                     libelle: "Conseil régional" },
-  { code: "fif_pl",                     libelle: "FIF-PL (indépendants)" },
   { code: "personnel",                  libelle: "Personnel / Auto-financement" },
   { code: "autre",                      libelle: "Autre" },
 ] as const;
 
+// Suggestion de financement selon le statut professionnel + reconversion
 export function financementsSuggeres(statutPro: string | null, reconversion: boolean): string[] {
-  if (statutPro === "demandeur_emploi") return ["poei", "aif", "afpr", "cpf", "agefiph", "region"];
+  if (statutPro === "demandeur_emploi") return ["france_travail", "aif", "poei", "poec", "afpr", "cpf", "agefiph", "region"];
   if (statutPro === "salarie" && reconversion) return ["cpf_transition_pro", "cpf", "plan_dev_competences"];
-  if (statutPro === "salarie") return ["plan_dev_competences", "cpf", "vae", "personnel"];
-  if (statutPro === "auto_entrepreneur") return ["fif_pl", "cpf", "personnel"];
-  if (statutPro === "etudiant") return ["apprentissage", "contrat_pro", "personnel"];
+  if (statutPro === "salarie") return ["plan_dev_competences", "opco", "cpf", "vae", "personnel"];
+  if (statutPro === "auto_entrepreneur") return ["faf", "cpf", "personnel"];
+  if (statutPro === "etudiant") return ["alternance", "opco", "personnel"];
   if (statutPro === "sans_activite") return ["cpf", "region", "personnel"];
   return ["cpf", "personnel"];
 }
@@ -108,6 +115,7 @@ export const STATUTS_LEAD = [
   { code: "perdu",     libelle: "Perdu",          couleur: "rose" },
 ] as const;
 
+// Calcul AUTOMATIQUE du statut lead selon la qualité du dossier
 export function calculerStatutLead(candidat: {
   email?: string | null;
   telephone?: string | null;
@@ -138,16 +146,39 @@ export function calculerStatutLead(candidat: {
 }
 
 export const SITUATIONS_CANDIDAT = [
-  "Lycéen·ne", "Étudiant·e", "Salarié·e en poste", "Salarié·e en CDD",
-  "Demandeur·euse d'emploi", "En reconversion", "Indépendant·e", "Sans activité", "Autre",
+  "Lycéen·ne",
+  "Étudiant·e",
+  "Salarié·e en poste",
+  "Salarié·e en CDD",
+  "Demandeur·euse d'emploi",
+  "En reconversion",
+  "Indépendant·e",
+  "Sans activité",
+  "Autre",
 ] as const;
 
 export const NIVEAUX_ANGLAIS = ["A1", "A2", "B1", "B2", "C1", "C2"] as const;
 
-export const MOBILITE_GEO = ["Locale (< 30 km)", "Régionale", "Nationale", "Internationale"] as const;
+export const MOBILITE_GEO = [
+  "Locale (< 30 km)",
+  "Régionale",
+  "Nationale",
+  "Internationale",
+] as const;
 
-export const PRESCRIPTEURS = ["France Travail", "Mission Locale", "Cap Emploi", "Bouche-à-oreille", "Recommandation", "Site web", "Salon", "Réseaux sociaux", "Autre"] as const;
+export const PRESCRIPTEURS = [
+  "France Travail",
+  "Mission Locale",
+  "Cap Emploi",
+  "Bouche-à-oreille",
+  "Recommandation",
+  "Site web",
+  "Salon",
+  "Réseaux sociaux",
+  "Autre",
+] as const;
 
+// 3 PIPELINES OPPORTUNITÉ
 export const PIPELINE_APPRENTISSAGE = [
   { cle: "demande_renseignement", libelle: "Demande de renseignement", probabilite: 10, ordre: 1 },
   { cle: "candidature",            libelle: "Candidature",              probabilite: 20, ordre: 2 },

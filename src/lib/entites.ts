@@ -1,41 +1,12 @@
-// CDC section 1.1 : 6 entités du groupe
+// CDC section 1.1 : 6 entités du groupe + ALIOS
 export const ENTITES = [
-  {
-    code: "PNFF",
-    nom: "PNFF",
-    specialite: "Formations Hôtellerie-Restauration",
-    ville: "Paris / Île-de-France",
-  },
-  {
-    code: "DBS",
-    nom: "DBS Paris",
-    specialite: "Commerce, Négociation, Management",
-    ville: "Province",
-  },
-  {
-    code: "PNBS",
-    nom: "PNBS Paris",
-    specialite: "Commerce, Négociation, Management",
-    ville: "National",
-  },
-  {
-    code: "ORCEA",
-    nom: "ORCEA",
-    specialite: "Commerce, Négociation, Management",
-    ville: "Amiens",
-  },
-  {
-    code: "PNFB",
-    nom: "PNFB Paris",
-    specialite: "Bâtiment, Peinture, Électricité, Maçonnerie, Propreté",
-    ville: "Paris",
-  },
-  {
-    code: "PBA",
-    nom: "PBA Paris",
-    specialite: "Petite Enfance, Esthétique Cosmétique",
-    ville: "Paris",
-  },
+  { code: "PNFF",  nom: "PNFF",       specialite: "Formations Hôtellerie-Restauration", ville: "Paris / Île-de-France" },
+  { code: "DBS",   nom: "DBS Paris",  specialite: "Commerce, Négociation, Management", ville: "Province" },
+  { code: "PNBS",  nom: "PNBS Paris", specialite: "Commerce, Négociation, Management", ville: "National" },
+  { code: "ORCEA", nom: "ORCEA",      specialite: "Commerce, Négociation, Management", ville: "Amiens" },
+  { code: "PNFB",  nom: "PNFB Paris", specialite: "Bâtiment, Peinture, Électricité, Maçonnerie, Propreté", ville: "Paris" },
+  { code: "PBA",   nom: "PBA Paris",  specialite: "Petite Enfance, Esthétique Cosmétique", ville: "Paris" },
+  { code: "ALIOS", nom: "ALIOS",      specialite: "Formation continue & reconversion professionnelle", ville: "Paris" },
 ] as const;
 
 export type EntiteCode = (typeof ENTITES)[number]["code"];

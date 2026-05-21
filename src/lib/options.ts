@@ -1,62 +1,152 @@
 // Constantes d'options pour les champs Candidat/Entreprise/Opportunité
 
-export const FINANCEMENTS = [
-  "CPF",
-  "OPCO",
-  "France Travail",
-  "Employeur",
-  "Personnel",
-  "Région",
-  "AGEFIPH",
-  "Conseil départemental",
+// 80 nationalités les plus courantes en France (alphabétique, Française en premier)
+export const NATIONALITES = [
+  "Française",
+  "—",
+  "Algérienne", "Allemande", "Américaine", "Anglaise", "Angolaise", "Argentine", "Arménienne", "Australienne", "Autrichienne",
+  "Belge", "Béninoise", "Bolivienne", "Brésilienne", "Britannique", "Bulgare", "Burkinabée",
+  "Camerounaise", "Canadienne", "Centrafricaine", "Chilienne", "Chinoise", "Colombienne", "Comorienne", "Congolaise", "Coréenne", "Croate", "Cubaine",
+  "Danoise", "Djiboutienne", "Dominicaine",
+  "Égyptienne", "Émiratie", "Équatorienne", "Érythréenne", "Espagnole", "Estonienne", "Éthiopienne",
+  "Finlandaise",
+  "Gabonaise", "Géorgienne", "Ghanéenne", "Grecque", "Guatémaltèque", "Guinéenne",
+  "Haïtienne", "Hondurienne", "Hongroise",
+  "Indienne", "Indonésienne", "Iranienne", "Irakienne", "Irlandaise", "Islandaise", "Israélienne", "Italienne", "Ivoirienne",
+  "Jamaïcaine", "Japonaise", "Jordanienne",
+  "Kazakhe", "Kényane", "Kosovare",
+  "Laotienne", "Lettone", "Libanaise", "Libérienne", "Libyenne", "Lituanienne", "Luxembourgeoise",
+  "Macédonienne", "Malgache", "Malienne", "Marocaine", "Mauricienne", "Mauritanienne", "Mexicaine", "Moldave", "Monégasque", "Mongole",
+  "Néerlandaise", "Néo-zélandaise", "Népalaise", "Nigériane", "Nigérienne", "Norvégienne",
+  "Pakistanaise", "Palestinienne", "Panaméenne", "Paraguayenne", "Péruvienne", "Philippine", "Polonaise", "Portugaise",
+  "Qatarienne",
+  "Roumaine", "Russe", "Rwandaise",
+  "Saoudienne", "Sénégalaise", "Serbe", "Slovaque", "Slovène", "Somalienne", "Soudanaise", "Sri-lankaise", "Suédoise", "Suisse", "Syrienne",
+  "Tadjike", "Taïwanaise", "Tanzanienne", "Tchadienne", "Tchèque", "Thaïlandaise", "Togolaise", "Tunisienne", "Turque", "Turkmène",
+  "Ukrainienne", "Uruguayenne",
+  "Vénézuélienne", "Vietnamienne",
+  "Yéménite",
+  "Zambienne", "Zimbabwéenne",
   "Autre",
+];
+
+export const SOURCES_ENTREE = [
+  { code: "indeed",            libelle: "Indeed",                      type: "ats" },
+  { code: "hellowork",         libelle: "HelloWork",                   type: "ats" },
+  { code: "labonnealternance", libelle: "La Bonne Alternance",         type: "ats" },
+  { code: "francetravail",     libelle: "France Travail",              type: "ats" },
+  { code: "linkedin",          libelle: "LinkedIn Jobs",               type: "ats" },
+  { code: "site_internet",     libelle: "Site internet du CFA",        type: "web" },
+  { code: "formulaire_public", libelle: "Formulaire public CRM",       type: "web" },
+  { code: "sur_site",          libelle: "Sur site (visite au CFA)",    type: "physique" },
+  { code: "salon",             libelle: "Salon / Job Dating",          type: "physique" },
+  { code: "recommandation",    libelle: "Recommandation / Bouche-à-oreille", type: "off" },
+  { code: "mission_locale",    libelle: "Mission Locale",              type: "prescripteur" },
+  { code: "cap_emploi",        libelle: "Cap Emploi",                  type: "prescripteur" },
+  { code: "appel_entrant",     libelle: "Appel téléphonique entrant",  type: "tel" },
+  { code: "email_entrant",     libelle: "Email entrant",               type: "email" },
+  { code: "instagram",         libelle: "Instagram",                   type: "social" },
+  { code: "facebook",          libelle: "Facebook",                    type: "social" },
+  { code: "tiktok",            libelle: "TikTok",                      type: "social" },
+  { code: "autre",             libelle: "Autre",                       type: "autre" },
 ] as const;
+
+export const SOURCES_ATS = ["indeed", "hellowork", "labonnealternance", "francetravail", "linkedin"];
+
+export const STATUTS_PRO = [
+  { code: "demandeur_emploi",   libelle: "Demandeur d'emploi" },
+  { code: "salarie",            libelle: "Salarié·e" },
+  { code: "sans_activite",      libelle: "Sans activité" },
+  { code: "auto_entrepreneur",  libelle: "Auto-entrepreneur / Indépendant" },
+  { code: "etudiant",           libelle: "Étudiant·e / Lycéen·ne" },
+  { code: "fonctionnaire",      libelle: "Fonctionnaire" },
+  { code: "autre",              libelle: "Autre" },
+] as const;
+
+export const ANCIENNETE_SALARIE = [
+  "Moins de 6 mois",
+  "6 à 12 mois",
+  "1 à 3 ans",
+  "3 à 5 ans",
+  "Plus de 5 ans",
+] as const;
+
+export const FINANCEMENTS = [
+  { code: "apprentissage",              libelle: "Apprentissage (OPCO + entreprise)" },
+  { code: "contrat_pro",                libelle: "Contrat de professionnalisation" },
+  { code: "cpf",                        libelle: "CPF (Compte Personnel de Formation)" },
+  { code: "cpf_transition_pro",         libelle: "CPF de Transition Professionnelle (PTP)" },
+  { code: "poei",                       libelle: "POEI (Préparation Opérationnelle à l'Emploi Individuelle)" },
+  { code: "aif",                        libelle: "AIF (Aide Individuelle à la Formation)" },
+  { code: "afpr",                       libelle: "AFPR (Action de Formation Préalable au Recrutement)" },
+  { code: "plan_dev_competences",       libelle: "Plan de développement des compétences (employeur)" },
+  { code: "vae",                        libelle: "VAE (Validation des Acquis de l'Expérience)" },
+  { code: "agefiph",                    libelle: "AGEFIPH (travailleurs handicapés)" },
+  { code: "region",                     libelle: "Conseil régional" },
+  { code: "fif_pl",                     libelle: "FIF-PL (indépendants)" },
+  { code: "personnel",                  libelle: "Personnel / Auto-financement" },
+  { code: "autre",                      libelle: "Autre" },
+] as const;
+
+export function financementsSuggeres(statutPro: string | null, reconversion: boolean): string[] {
+  if (statutPro === "demandeur_emploi") return ["poei", "aif", "afpr", "cpf", "agefiph", "region"];
+  if (statutPro === "salarie" && reconversion) return ["cpf_transition_pro", "cpf", "plan_dev_competences"];
+  if (statutPro === "salarie") return ["plan_dev_competences", "cpf", "vae", "personnel"];
+  if (statutPro === "auto_entrepreneur") return ["fif_pl", "cpf", "personnel"];
+  if (statutPro === "etudiant") return ["apprentissage", "contrat_pro", "personnel"];
+  if (statutPro === "sans_activite") return ["cpf", "region", "personnel"];
+  return ["cpf", "personnel"];
+}
 
 export const STATUTS_LEAD = [
-  { code: "froid",     libelle: "Froid (non qualifié)",      couleur: "gray"    },
-  { code: "tiede",     libelle: "Tiède",                      couleur: "blue"    },
-  { code: "chaud",     libelle: "Chaud",                      couleur: "amber"   },
-  { code: "mql",       libelle: "MQL (Marketing Qualified)",  couleur: "purple"  },
-  { code: "sql",       libelle: "SQL (Sales Qualified)",      couleur: "orange"  },
-  { code: "client",    libelle: "Client (placé)",             couleur: "emerald" },
-  { code: "perdu",     libelle: "Perdu",                      couleur: "rose"    },
+  { code: "froid",     libelle: "Froid",          couleur: "gray" },
+  { code: "tiede",     libelle: "Tiède",          couleur: "blue" },
+  { code: "chaud",     libelle: "Chaud",          couleur: "amber" },
+  { code: "mql",       libelle: "MQL",            couleur: "purple" },
+  { code: "sql",       libelle: "SQL",            couleur: "orange" },
+  { code: "client",    libelle: "Client (placé)", couleur: "emerald" },
+  { code: "perdu",     libelle: "Perdu",          couleur: "rose" },
 ] as const;
 
+export function calculerStatutLead(candidat: {
+  email?: string | null;
+  telephone?: string | null;
+  formationId?: string | null;
+  formationManuelleNom?: string | null;
+  financementChoisi?: string | null;
+  statutPro?: string | null;
+  societeMatcheeId?: string | null;
+  reconversion?: boolean | null;
+  consentRgpd?: boolean | null;
+}): { statut: string; score: number } {
+  let score = 0;
+  if (candidat.email) score += 10;
+  if (candidat.telephone) score += 10;
+  if (candidat.consentRgpd) score += 5;
+  if (candidat.statutPro) score += 10;
+  if (candidat.financementChoisi) score += 20;
+  if (candidat.formationId || candidat.formationManuelleNom) score += 20;
+  if (candidat.reconversion) score += 5;
+  if (candidat.societeMatcheeId) score += 20;
+
+  let statut = "froid";
+  if (score >= 80) statut = "sql";
+  else if (score >= 60) statut = "mql";
+  else if (score >= 45) statut = "chaud";
+  else if (score >= 25) statut = "tiede";
+  return { statut, score };
+}
+
 export const SITUATIONS_CANDIDAT = [
-  "Lycéen·ne",
-  "Étudiant·e",
-  "Salarié·e en poste",
-  "Salarié·e en CDD",
-  "Demandeur·euse d'emploi",
-  "En reconversion",
-  "Indépendant·e",
-  "Sans activité",
-  "Autre",
+  "Lycéen·ne", "Étudiant·e", "Salarié·e en poste", "Salarié·e en CDD",
+  "Demandeur·euse d'emploi", "En reconversion", "Indépendant·e", "Sans activité", "Autre",
 ] as const;
 
 export const NIVEAUX_ANGLAIS = ["A1", "A2", "B1", "B2", "C1", "C2"] as const;
 
-export const MOBILITE_GEO = [
-  "Locale (< 30 km)",
-  "Régionale",
-  "Nationale",
-  "Internationale",
-] as const;
+export const MOBILITE_GEO = ["Locale (< 30 km)", "Régionale", "Nationale", "Internationale"] as const;
 
-export const PRESCRIPTEURS = [
-  "France Travail",
-  "Mission Locale",
-  "Cap Emploi",
-  "Bouche-à-oreille",
-  "Recommandation",
-  "Site web",
-  "Salon",
-  "Réseaux sociaux",
-  "Autre",
-] as const;
-
-// 3 PIPELINES OPPORTUNITÉ (= candidature)
-// Chaque pipeline a sa propre liste d'étapes
+export const PRESCRIPTEURS = ["France Travail", "Mission Locale", "Cap Emploi", "Bouche-à-oreille", "Recommandation", "Site web", "Salon", "Réseaux sociaux", "Autre"] as const;
 
 export const PIPELINE_APPRENTISSAGE = [
   { cle: "demande_renseignement", libelle: "Demande de renseignement", probabilite: 10, ordre: 1 },
@@ -94,7 +184,7 @@ export const PIPELINE_FORMATION_CONTINUE = [
 ] as const;
 
 export const TYPES_OPPORTUNITE = [
-  { cle: "apprentissage",       libelle: "Apprentissage / Alternance", stages: PIPELINE_APPRENTISSAGE,        couleur: "#FF7A59" },
-  { cle: "formation_pro",       libelle: "Formation professionnelle longue", stages: PIPELINE_FORMATION_PRO, couleur: "#00BDA5" },
-  { cle: "formation_continue",  libelle: "Formation continue courte",   stages: PIPELINE_FORMATION_CONTINUE,  couleur: "#516F90" },
+  { cle: "apprentissage",       libelle: "Apprentissage / Alternance",       stages: PIPELINE_APPRENTISSAGE,       couleur: "#FF7A59" },
+  { cle: "formation_pro",       libelle: "Formation professionnelle longue", stages: PIPELINE_FORMATION_PRO,       couleur: "#00BDA5" },
+  { cle: "formation_continue",  libelle: "Formation continue courte",         stages: PIPELINE_FORMATION_CONTINUE,  couleur: "#516F90" },
 ] as const;

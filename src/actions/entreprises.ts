@@ -87,6 +87,28 @@ export async function creerEntreprise(formData: FormData) {
       statut: "prospect",
     },
   });
+
+  // Crée automatiquement les Contacts à partir des dirigeants INSEE
+  const dirigeantsJSON = String(formData.get("dirigeantsJSON") || "");
+  if (dirigeantsJSON) {
+    try {
+      const dirigeants = JSON.parse(dirigeantsJSON) as { nom: string; prenom: string; qualite: string }[];
+      for (const d of dirigeants) {
+        if (!d.nom) continue;
+        await prisma.contact.create({
+          data: {
+            nom: d.nom,
+            prenom: d.prenom || "—",
+            fonction: d.qualite || "Dirigeant",
+            entrepriseId: entreprise.id,
+          },
+        });
+      }
+    } catch {
+      // JSON invalide, on ignore
+    }
+  }
+
   revalidatePath("/entreprises");
   redirect(`/entreprises/${entreprise.id}`);
 }

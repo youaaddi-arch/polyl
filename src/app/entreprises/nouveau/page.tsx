@@ -1,6 +1,7 @@
 import { prisma } from "@/lib/db";
 import { creerEntreprise } from "@/actions/entreprises";
 import { PERSONAS_ENTREPRISE } from "@/lib/entites";
+import SiretAutoFill from "@/components/SiretAutoFill";
 import Link from "next/link";
 
 export const dynamic = "force-dynamic";
@@ -16,10 +17,10 @@ export default async function NouvelleEntreprisePage() {
 
         <section className="card p-6 space-y-4">
           <h2 className="font-semibold border-b border-hubspot-border pb-2">🏢 Identification légale</h2>
+          <SiretAutoFill />
           <Field label="Raison sociale *" name="raisonSociale" required />
           <div className="grid grid-cols-2 gap-4">
-            <Field label="SIRET" name="siret" placeholder="14 chiffres" />
-            <Field label="SIREN" name="siren" placeholder="9 chiffres" />
+            <Field label="SIREN" name="siren" placeholder="9 chiffres (auto)" />
             <Field label="Code NAF / APE" name="naf" placeholder="ex : 4711F" />
             <Field label="N° TVA intracommunautaire" name="numTVA" placeholder="FR..." />
             <Select label="Forme juridique" name="formeJuridique" options={[

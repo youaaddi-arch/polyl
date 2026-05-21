@@ -2,6 +2,7 @@
 
 import { prisma } from "@/lib/db";
 import { revalidatePath } from "next/cache";
+import * as XLSX from "xlsx";
 
 // Mapping intelligent : alias acceptés → clé Prisma
 // Permet d'importer des CSV avec des noms de colonnes variés
@@ -123,6 +124,18 @@ function parseCSV(text: string): { headers: string[]; rows: string[][] } {
   return { headers, rows };
 }
 
+async function parseXLSX(file: File): Promise<{ headers: string[]; rows: string[][] }> {
+  const buf = await file.arrayBuffer();
+  const wb = XLSX.read(buf, { type: "array", cellDates: true });
+  const sheet = wb.Sheets[wb.SheetNames[0]];
+  if (!sheet) return { headers: [], rows: [] };
+  const matrix = XLSX.utils.sheet_to_json<unknown[]>(sheet, { header: 1, raw: false, defval: "" });
+  if (matrix.length < 2) return { headers: [], rows: [] };
+  const headers = (matrix[0] as unknown[]).map((h) => String(h ?? "").trim());
+  const rows = matrix.slice(1).map((r) => (r as unknown[]).map((v) => String(v ?? "").trim()));
+  return { headers, rows };
+}
+
 function castValue(prismaKey: string, val: string): any {
   if (!val) return null;
   // Booléens
@@ -151,9 +164,10 @@ export async function importerCSV(formData: FormData) {
   const file = formData.get("fichier") as File | null;
   if (!file) throw new Error("Fichier obligatoire");
 
-  const text = await file.text();
-  const { headers, rows } = parseCSV(text);
-  if (rows.length === 0) throw new Error("CSV vide ou invalide");
+  const ext = file.name.toLowerCase().split(".").pop() ?? "";
+  const isExcel = ext === "xlsx" || ext === "xls" || file.type.includes("spreadsheet");
+  const { headers, rows } = isExcel ? await parseXLSX(file) : parseCSV(await file.text());
+  if (rows.length === 0) throw new Error("Fichier vide ou invalide");
 
   const dico = objet === "candidats" ? ALIAS_CANDIDAT : ALIAS_ENTREPRISE;
   // Compose la table de correspondance "index colonne → champ Prisma"

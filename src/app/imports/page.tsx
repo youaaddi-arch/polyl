@@ -14,7 +14,7 @@ export default async function ImportsPage() {
 
       <section className="grid grid-cols-1 md:grid-cols-2 gap-6">
         <div className="card p-5">
-          <h2 className="font-semibold mb-3">📥 Importer un CSV</h2>
+          <h2 className="font-semibold mb-3">📥 Importer CSV ou Excel</h2>
           <form action={importerCSV} className="space-y-3" encType="multipart/form-data">
             <label className="block">
               <span className="block text-sm font-medium text-gray-700 mb-1">Type de données</span>
@@ -24,12 +24,13 @@ export default async function ImportsPage() {
               </select>
             </label>
             <label className="block">
-              <span className="block text-sm font-medium text-gray-700 mb-1">Fichier CSV *</span>
-              <input name="fichier" type="file" accept=".csv,text/csv" required className="w-full text-sm" />
+              <span className="block text-sm font-medium text-gray-700 mb-1">Fichier .csv, .xlsx ou .xls *</span>
+              <input name="fichier" type="file" accept=".csv,.xlsx,.xls,text/csv,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet,application/vnd.ms-excel" required className="w-full text-sm" />
             </label>
             <p className="text-xs text-gray-500">
-              Format candidats : <code>prenom,nom,email,telephone,ville</code><br />
-              Format entreprises : <code>raisonSociale,siret,secteur,ville,taille</code>
+              Format candidats : <code>prenom, nom, email, telephone, ville…</code><br />
+              Format entreprises : <code>raisonSociale, siret, secteur, ville, taille…</code><br />
+              <span className="text-emerald-600">✓ Excel (.xlsx) supporté — première feuille uniquement</span>
             </p>
             <button className="btn-primary w-full justify-center">Importer</button>
           </form>

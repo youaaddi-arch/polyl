@@ -16,7 +16,8 @@ export default async function FicheFormation({ params }: { params: { id: string 
         <Link href="/formations" className="text-sm text-brand-600 hover:underline">← Catalogue</Link>
         <h1 className="text-2xl font-bold mt-1">{f.intitule}</h1>
         <div className="flex gap-2 mt-2">
-          <span className="badge bg-gray-100 text-gray-700">{f.entite.code}</span>
+          {f.entite && <span className="badge bg-gray-100 text-gray-700">{f.entite.code}</span>}
+          {f.domaine && !f.entite && <span className="badge bg-purple-100 text-purple-700">ALIOS · {f.domaine}</span>}
           <span className="badge bg-brand-50 text-brand-700">{f.niveau}</span>
           <span className="badge bg-purple-50 text-purple-700">{f.type}</span>
         </div>

@@ -48,7 +48,7 @@ export default async function NouveauDealPage() {
             <span className="block text-sm font-medium text-hubspot-text mb-1">Formation visée</span>
             <select name="formationId" className="w-full rounded border border-hubspot-border px-3 py-2 bg-white">
               <option value="">— choisir —</option>
-              {formations.map((f) => <option key={f.id} value={f.id}>[{f.entite.code}] {f.intitule}</option>)}
+              {formations.map((f) => <option key={f.id} value={f.id}>{f.entite ? `[${f.entite.code}] ` : ""}{f.intitule}</option>)}
             </select>
           </label>
           <label className="block">

@@ -73,7 +73,7 @@ export default async function RecherchePage({ searchParams }: { searchParams: { 
             {formations.map((f) => (
               <Link key={f.id} href={`/formations/${f.id}`} className="block card p-3 hover:border-brand-300">
                 <div className="font-medium">{f.intitule}</div>
-                <div className="text-xs text-gray-500">{f.entite.code} · {f.niveau}</div>
+                <div className="text-xs text-gray-500">{f.entite?.code ?? "ALIOS"} · {f.niveau}</div>
               </Link>
             ))}
           </Group>

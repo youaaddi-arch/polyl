@@ -62,7 +62,7 @@ export default async function FicheCandidat({ params }: { params: { id: string }
               <Row label="Intitulé" value={c.formation.intitule} />
               <Row label="Niveau" value={c.formation.niveau} />
               <Row label="Type" value={c.formation.type} />
-              <Row label="Entité" value={c.formation.entite.code} />
+              <Row label="Entité" value={c.formation.entite?.code ?? "ALIOS (formation continue)"} />
             </>
           ) : <p className="text-sm text-gray-400">Aucune formation associée</p>}
         </div>

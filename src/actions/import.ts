@@ -3,6 +3,7 @@
 import { prisma } from "@/lib/db";
 import { revalidatePath } from "next/cache";
 import * as XLSX from "xlsx";
+import { chercherEntrepriseParSiret } from "@/lib/insee";
 
 // Mapping intelligent : alias acceptés → clé Prisma
 // Permet d'importer des CSV avec des noms de colonnes variés
@@ -364,32 +365,48 @@ async function importerAlternance(file: File) {
       if (!nom) { rejNomVide++; continue; }
       if (!prenom) { rejPrenomVide++; continue; }
 
-      // 1) ENTREPRISE (dédupe par SIRET, sinon par nom) — upsert
+      // 1) ENTREPRISE (dédupe par SIRET, sinon par nom) — upsert + enrichissement INSEE
       let entrepriseId: string | undefined;
       if (raison) {
         const siret = normSiret(get(row, idxSiret));
         const cacheKey = siret ?? raison.toLowerCase().trim();
         entrepriseId = entrepriseCache.get(cacheKey);
         if (!entrepriseId) {
-          const dataEnt = {
-            raisonSociale: raison,
+          // Appel INSEE si SIRET valide (enrichit raisonSociale, NAF, effectif, adresse, dirigeants…)
+          const insee = siret ? await chercherEntrepriseParSiret(siret).catch(() => null) : null;
+
+          // Données INSEE en priorité, Excel en complément/écrasement
+          const dataEnt: any = {
+            raisonSociale: insee?.raisonSociale || raison,
             siret: siret ?? undefined,
-            siren: siret?.substring(0, 9),
+            siren: siret?.substring(0, 9) ?? insee?.siren,
+            naf: insee?.naf ?? null,
+            formeJuridique: insee?.formeJuridique ?? null,
             opcoRattache: get(row, idxOpcoEnt) || null,
-            adresse: get(row, idxAdrEnt) || null,
-            ville: get(row, idxVilleEnt) || null,
+            adresse: get(row, idxAdrEnt) || insee?.adresse || null,
+            codePostal: insee?.codePostal ?? null,
+            ville: get(row, idxVilleEnt) || insee?.ville || null,
+            pays: "France",
             telephoneStandard: get(row, idxTelEnt) || null,
             email: get(row, idxMailEnt) || null,
+            secteur: insee?.libelleNaf ?? null,
             statut: "partenaire_actif",
             etapePipeline: 15,
-            sourceDetection: "Import alternance",
+            sourceDetection: insee ? "Import alternance + enrichi INSEE" : "Import alternance",
             accordOPCO: true,
             rechercheAlternants: true,
             derniereActivite: new Date(),
           };
+          // Mappe tranche effectif INSEE → taille CRM
+          const t = insee?.effectif ?? "";
+          if (["00", "01", "02", "03"].includes(t)) dataEnt.taille = "TPE";
+          else if (["11", "12", "21", "22"].includes(t)) dataEnt.taille = "PME";
+          else if (["31", "32", "41", "42"].includes(t)) dataEnt.taille = "ETI";
+          else if (["51", "52", "53"].includes(t)) dataEnt.taille = "GE";
+
           const existante = siret
             ? await prisma.entreprise.findFirst({ where: { siret } })
-            : await prisma.entreprise.findFirst({ where: { raisonSociale: raison } });
+            : await prisma.entreprise.findFirst({ where: { raisonSociale: dataEnt.raisonSociale } });
           if (existante) {
             await prisma.entreprise.update({ where: { id: existante.id }, data: dataEnt });
             entrepriseId = existante.id;
@@ -398,6 +415,21 @@ async function importerAlternance(file: File) {
             const e = await prisma.entreprise.create({ data: dataEnt });
             entrepriseId = e.id;
             entreprisesCreees++;
+
+            // Crée les dirigeants INSEE comme Contacts (à la création seulement)
+            if (insee?.dirigeants?.length) {
+              for (const d of insee.dirigeants) {
+                if (!d.nom) continue;
+                await prisma.contact.create({
+                  data: {
+                    nom: d.nom,
+                    prenom: d.prenom || "—",
+                    fonction: d.qualite || "Dirigeant",
+                    entrepriseId: e.id,
+                  },
+                }).catch(() => {});
+              }
+            }
           }
           entrepriseCache.set(cacheKey, entrepriseId);
         }

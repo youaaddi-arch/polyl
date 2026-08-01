@@ -1,0 +1,1519 @@
+{
+  "$schema": "./docs/schema.meta.json",
+  "version": "0.3.0",
+  "workspace": "parisnordgroupe.twenty.com",
+  "_notes": {
+    "scope": "J2 MVP — clés, relations, dates + CDC Marketing v3 (UTM, attribution, segmentation).",
+    "fieldTypes": "TEXT, NUMBER, BOOLEAN, DATE_TIME, EMAILS, PHONES, SELECT, MULTI_SELECT, RELATION",
+    "relations": "Toutes les FK pointent vers d'autres custom objects sauf Person/Company qui sont natifs.",
+    "outOfScopeJ2": [
+      "GTM injection (côté formulaire candidature — pas applicable au CRM)",
+      "Webhooks Make → Brevo (workflows Twenty, fait en S2)",
+      "Export quotidien Google Sheets (S2)",
+      "Calculs automatiques (age, departement, region, scoreQualite, nbContratsSignes) — workflows Twenty, J3",
+      "Filtres dans vues pipeline (UI Twenty, fait manuellement)",
+      "Documents Qualiopi tests/bilans (gérés dans un autre outil par décision Yousra)",
+      "formationsCompatibles entreprise→formations (relation M2M, J3)"
+    ]
+  },
+  "entites": [
+    {
+      "code": "PNBS",
+      "nom": "Paris Nord Business School",
+      "domaines": [
+        "Commerce",
+        "Management"
+      ]
+    },
+    {
+      "code": "PBA",
+      "nom": "Paris Beauty Academy",
+      "domaines": [
+        "Petite Enfance",
+        "Esthétique"
+      ]
+    },
+    {
+      "code": "PNFF",
+      "nom": "Paris Nord Food Formation",
+      "domaines": [
+        "Hôtellerie",
+        "Restauration"
+      ]
+    },
+    {
+      "code": "DBS",
+      "nom": "Digital Business School Paris",
+      "domaines": [
+        "Commerce",
+        "Management"
+      ]
+    },
+    {
+      "code": "ORCEA",
+      "nom": "ORCEA Amiens",
+      "domaines": [
+        "Commerce",
+        "Management"
+      ]
+    },
+    {
+      "code": "PNFB",
+      "nom": "Paris Nord Formation Bâtiment",
+      "domaines": [
+        "Bâtiment",
+        "Peinture",
+        "Électricité",
+        "Propreté"
+      ]
+    },
+    {
+      "code": "ALIOS",
+      "nom": "ALIOS",
+      "domaines": [
+        "Continuing education"
+      ],
+      "statut": "en_construction"
+    },
+    {
+      "code": "CIDD",
+      "nom": "CIDD",
+      "domaines": [
+        "B2B continuing education",
+        "B2C continuing education"
+      ]
+    },
+    {
+      "code": "MYCENES",
+      "nom": "Mycènes Conseil",
+      "domaines": [
+        "CFA"
+      ]
+    }
+  ],
+  "objects": {
+    "entite": {
+      "labelSingular": "Entité",
+      "labelPlural": "Entités",
+      "description": "Une des 9 entités du groupe Paris Nord (PNBS, PBA, PNFF, DBS, ORCEA, PNFB, ALIOS, CIDD, Mycènes).",
+      "icon": "IconBuilding",
+      "labelIdentifier": "code",
+      "fields": [
+        {
+          "name": "code",
+          "label": "Code",
+          "type": "TEXT",
+          "description": "Code court (PNBS, PBA…)",
+          "isNullable": false
+        },
+        {
+          "name": "nom",
+          "label": "Nom",
+          "type": "TEXT",
+          "description": "Raison sociale"
+        },
+        {
+          "name": "siret",
+          "label": "SIRET",
+          "type": "TEXT"
+        },
+        {
+          "name": "numeroQualiopi",
+          "label": "N° Qualiopi",
+          "type": "TEXT"
+        },
+        {
+          "name": "numeroDeclarationAct",
+          "label": "N° déclaration activité",
+          "type": "TEXT"
+        },
+        {
+          "name": "adresse",
+          "label": "Adresse",
+          "type": "TEXT"
+        },
+        {
+          "name": "statut",
+          "label": "Statut",
+          "type": "SELECT",
+          "options": [
+            {
+              "value": "ACTIF",
+              "label": "Actif",
+              "color": "green"
+            },
+            {
+              "value": "EN_CONSTRUCTION",
+              "label": "En construction",
+              "color": "yellow"
+            },
+            {
+              "value": "FERME",
+              "label": "Fermé",
+              "color": "gray"
+            }
+          ],
+          "defaultValue": "ACTIF"
+        }
+      ]
+    },
+    "apprenant": {
+      "labelSingular": "Apprenant",
+      "labelPlural": "Apprenants",
+      "description": "Personne en formation. Cycle de vie distinct de Person (qui reste pour les contacts B2B).",
+      "icon": "IconUserCircle",
+      "labelIdentifier": "fullName",
+      "fields": [
+        {
+          "name": "fullName",
+          "label": "Nom complet",
+          "type": "FULL_NAME",
+          "description": "Composite Prénom + Nom (sous-champs firstName/lastName), comme Person natif."
+        },
+        {
+          "name": "email",
+          "label": "Email",
+          "type": "EMAILS"
+        },
+        {
+          "name": "telephone",
+          "label": "Téléphone",
+          "type": "PHONES"
+        },
+        {
+          "name": "dateNaissance",
+          "label": "Date de naissance",
+          "type": "DATE_TIME"
+        },
+        {
+          "name": "modalite",
+          "label": "Modalité",
+          "type": "SELECT",
+          "description": "Détermine quel pipeline est actif.",
+          "options": [
+            {
+              "value": "ALTERNANCE",
+              "label": "Alternance",
+              "color": "blue"
+            },
+            {
+              "value": "FC_DIPLOMANTE",
+              "label": "FC diplômante",
+              "color": "purple"
+            },
+            {
+              "value": "FC_COURTE",
+              "label": "FC courte",
+              "color": "orange"
+            }
+          ]
+        },
+        {
+          "name": "stageAlternance",
+          "label": "Stage Alternance",
+          "type": "SELECT",
+          "options": [
+            {
+              "value": "CANDIDATURE_RECUE",
+              "label": "Candidature reçue",
+              "color": "gray",
+              "position": 0
+            },
+            {
+              "value": "EMAIL_BIENVENUE_ENVOYE",
+              "label": "Email de bienvenue envoyé",
+              "color": "blue",
+              "position": 1
+            },
+            {
+              "value": "FICHE_BESOIN_COMPLETEE",
+              "label": "Fiche de besoin complétée",
+              "color": "sky",
+              "position": 2
+            },
+            {
+              "value": "CONVOQUE_TESTS",
+              "label": "Convoqué aux tests",
+              "color": "purple",
+              "position": 3
+            },
+            {
+              "value": "TESTS_PASSES",
+              "label": "Tests passés",
+              "color": "pink",
+              "position": 4
+            },
+            {
+              "value": "ENTRETIEN_MOTIVATION_FAIT",
+              "label": "Entretien de motivation fait",
+              "color": "red",
+              "position": 5
+            },
+            {
+              "value": "ELIGIBLE_PLACEMENT",
+              "label": "Éligible au placement",
+              "color": "orange",
+              "position": 6
+            },
+            {
+              "value": "MATCHING_EN_COURS",
+              "label": "Matching en cours",
+              "color": "yellow",
+              "position": 7
+            },
+            {
+              "value": "PROFIL_ENVOYE_ENTREPRISE",
+              "label": "Profil envoyé à l'entreprise",
+              "color": "green",
+              "position": 8
+            },
+            {
+              "value": "ENTRETIEN_ENTREPRISE_PLANIFIE",
+              "label": "Entretien entreprise planifié",
+              "color": "turquoise",
+              "position": 9
+            },
+            {
+              "value": "ENTRETIEN_ENTREPRISE_REALISE",
+              "label": "Entretien entreprise réalisé",
+              "color": "gray",
+              "position": 10
+            },
+            {
+              "value": "RETENU_PAR_ENTREPRISE",
+              "label": "Retenu par l'entreprise",
+              "color": "blue",
+              "position": 11
+            },
+            {
+              "value": "CONTRAT_CERFA_SIGNE",
+              "label": "Contrat CERFA signé",
+              "color": "sky",
+              "position": 12
+            },
+            {
+              "value": "EN_FORMATION",
+              "label": "En formation",
+              "color": "purple",
+              "position": 13
+            },
+            {
+              "value": "DIPLOME",
+              "label": "Diplômé",
+              "color": "pink",
+              "position": 14
+            },
+            {
+              "value": "ALUMNI_UPSELL",
+              "label": "Alumni / upsell",
+              "color": "red",
+              "position": 15
+            }
+          ]
+        },
+        {
+          "name": "stageFcDiplomante",
+          "label": "Stage FC diplômante",
+          "type": "SELECT",
+          "options": [
+            {
+              "value": "CANDIDATURE_RECUE",
+              "label": "Candidature reçue",
+              "color": "gray",
+              "position": 0
+            },
+            {
+              "value": "EMAIL_BIENVENUE_ENVOYE",
+              "label": "Email de bienvenue envoyé",
+              "color": "blue",
+              "position": 1
+            },
+            {
+              "value": "FICHE_BESOIN_COMPLETEE",
+              "label": "Fiche de besoin complétée",
+              "color": "sky",
+              "position": 2
+            },
+            {
+              "value": "CONVOQUE_TESTS",
+              "label": "Convoqué aux tests",
+              "color": "purple",
+              "position": 3
+            },
+            {
+              "value": "TESTS_PASSES",
+              "label": "Tests passés",
+              "color": "pink",
+              "position": 4
+            },
+            {
+              "value": "ENTRETIEN_MOTIVATION_FAIT",
+              "label": "Entretien de motivation fait",
+              "color": "red",
+              "position": 5
+            },
+            {
+              "value": "ELIGIBLE_INSCRIPTION",
+              "label": "Éligible à l'inscription",
+              "color": "orange",
+              "position": 6
+            },
+            {
+              "value": "DOSSIER_FINANCEMENT_A_MONTER",
+              "label": "Dossier financement à monter",
+              "color": "yellow",
+              "position": 7
+            },
+            {
+              "value": "DOSSIER_FINANCEMENT_EN_COURS",
+              "label": "Dossier financement en cours",
+              "color": "green",
+              "position": 8
+            },
+            {
+              "value": "FINANCEMENT_VALIDE_CONVENTION_SIGNEE",
+              "label": "Financement validé — convention signée",
+              "color": "turquoise",
+              "position": 9
+            },
+            {
+              "value": "EN_FORMATION",
+              "label": "En formation",
+              "color": "gray",
+              "position": 10
+            },
+            {
+              "value": "DIPLOME",
+              "label": "Diplômé",
+              "color": "blue",
+              "position": 11
+            }
+          ]
+        },
+        {
+          "name": "stageFcCourte",
+          "label": "Stage FC courte",
+          "type": "SELECT",
+          "options": [
+            {
+              "value": "DEMANDE_INFORMATION",
+              "label": "Demande d'information",
+              "color": "gray",
+              "position": 0
+            },
+            {
+              "value": "DEVIS_ENVOYE",
+              "label": "Devis envoyé",
+              "color": "blue",
+              "position": 1
+            },
+            {
+              "value": "DEVIS_ACCEPTE",
+              "label": "Devis accepté",
+              "color": "sky",
+              "position": 2
+            },
+            {
+              "value": "CONVENTION_SIGNEE",
+              "label": "Convention signée",
+              "color": "purple",
+              "position": 3
+            },
+            {
+              "value": "CONFIRMATION_INSCRIPTION",
+              "label": "Confirmation d'inscription",
+              "color": "pink",
+              "position": 4
+            },
+            {
+              "value": "EN_FORMATION",
+              "label": "En formation",
+              "color": "red",
+              "position": 5
+            },
+            {
+              "value": "FORMATION_TERMINEE_ATTESTATION_ENVOYEE",
+              "label": "Formation terminée — attestation envoyée",
+              "color": "orange",
+              "position": 6
+            },
+            {
+              "value": "SATISFACTION_RECUEILLIE",
+              "label": "Satisfaction recueillie",
+              "color": "yellow",
+              "position": 7
+            }
+          ]
+        },
+        {
+          "name": "entite",
+          "label": "Entité",
+          "type": "RELATION",
+          "relatedObject": "entite",
+          "relatedLabel": "Apprenants"
+        },
+        {
+          "name": "utmSource",
+          "label": "UTM source",
+          "type": "TEXT",
+          "description": "Plateforme d'origine (google, facebook, linkedin)"
+        },
+        {
+          "name": "utmMedium",
+          "label": "UTM medium",
+          "type": "TEXT",
+          "description": "Type de canal (cpc, organic, referral, email)"
+        },
+        {
+          "name": "utmCampaign",
+          "label": "UTM campaign",
+          "type": "TEXT",
+          "description": "Nom de la campagne"
+        },
+        {
+          "name": "canalSource",
+          "label": "Canal source",
+          "type": "SELECT",
+          "description": "Étiquette lisible de la source d'acquisition. Direct par défaut si pas d'UTM.",
+          "options": [
+            {
+              "value": "GOOGLE_ADS",
+              "label": "Google Ads",
+              "color": "blue"
+            },
+            {
+              "value": "META_ADS",
+              "label": "Meta Ads",
+              "color": "sky"
+            },
+            {
+              "value": "LINKEDIN",
+              "label": "LinkedIn",
+              "color": "purple"
+            },
+            {
+              "value": "ORGANIQUE",
+              "label": "Organique",
+              "color": "green"
+            },
+            {
+              "value": "PRESCRIPTION",
+              "label": "Prescription",
+              "color": "yellow"
+            },
+            {
+              "value": "DIRECT",
+              "label": "Direct",
+              "color": "gray"
+            }
+          ],
+          "defaultValue": "DIRECT"
+        },
+        {
+          "name": "rentreeVisee",
+          "label": "Rentrée visée",
+          "type": "SELECT",
+          "options": [
+            {
+              "value": "SEPT_2026",
+              "label": "Septembre 2026",
+              "color": "blue"
+            },
+            {
+              "value": "JAN_2027",
+              "label": "Janvier 2027",
+              "color": "purple"
+            },
+            {
+              "value": "SEPT_2027",
+              "label": "Septembre 2027",
+              "color": "green"
+            }
+          ]
+        },
+        {
+          "name": "age",
+          "label": "Âge",
+          "type": "NUMBER",
+          "description": "Calculé depuis dateNaissance (workflow S2)"
+        },
+        {
+          "name": "ville",
+          "label": "Ville",
+          "type": "TEXT"
+        },
+        {
+          "name": "codePostal",
+          "label": "Code postal",
+          "type": "TEXT"
+        },
+        {
+          "name": "departement",
+          "label": "Département",
+          "type": "TEXT",
+          "description": "Calculé depuis codePostal (workflow S2)"
+        },
+        {
+          "name": "region",
+          "label": "Région",
+          "type": "TEXT",
+          "description": "Calculée depuis codePostal (workflow S2)"
+        },
+        {
+          "name": "mobiliteKm",
+          "label": "Mobilité (km)",
+          "type": "NUMBER"
+        },
+        {
+          "name": "linkedinUrl",
+          "label": "Profil LinkedIn",
+          "type": "TEXT"
+        },
+        {
+          "name": "formationVisee",
+          "label": "Formation visée",
+          "type": "SELECT",
+          "description": "Niveau de diplôme souhaité",
+          "options": [
+            {
+              "value": "BTS",
+              "label": "BTS",
+              "color": "blue"
+            },
+            {
+              "value": "BUT",
+              "label": "BUT",
+              "color": "sky"
+            },
+            {
+              "value": "BACHELOR",
+              "label": "Bachelor",
+              "color": "purple"
+            },
+            {
+              "value": "LICENCE_PRO",
+              "label": "Licence Pro",
+              "color": "pink"
+            },
+            {
+              "value": "MASTER",
+              "label": "Master",
+              "color": "green"
+            }
+          ]
+        },
+        {
+          "name": "secteurVise",
+          "label": "Secteur visé",
+          "type": "SELECT",
+          "options": [
+            {
+              "value": "COMMERCE",
+              "label": "Commerce",
+              "color": "blue"
+            },
+            {
+              "value": "INFORMATIQUE",
+              "label": "Informatique",
+              "color": "sky"
+            },
+            {
+              "value": "RH",
+              "label": "RH",
+              "color": "purple"
+            },
+            {
+              "value": "FINANCE",
+              "label": "Finance",
+              "color": "pink"
+            },
+            {
+              "value": "MARKETING",
+              "label": "Marketing",
+              "color": "orange"
+            }
+          ]
+        },
+        {
+          "name": "scoreQualite",
+          "label": "Score qualité (1-5)",
+          "type": "NUMBER",
+          "description": "Calculé à la création (workflow S2). Pilotage marketing uniquement."
+        }
+      ]
+    },
+    "formation": {
+      "labelSingular": "Formation",
+      "labelPlural": "Formations",
+      "description": "Fiche catalogue d'une formation (pas une session, voir ActionDeFormation).",
+      "icon": "IconBook",
+      "labelIdentifier": "intitule",
+      "fields": [
+        {
+          "name": "code",
+          "label": "Code",
+          "type": "TEXT",
+          "isNullable": false
+        },
+        {
+          "name": "intitule",
+          "label": "Intitulé",
+          "type": "TEXT",
+          "isNullable": false
+        },
+        {
+          "name": "rncpCode",
+          "label": "Code RNCP",
+          "type": "TEXT"
+        },
+        {
+          "name": "modalite",
+          "label": "Modalité",
+          "type": "SELECT",
+          "options": [
+            {
+              "value": "ALTERNANCE",
+              "label": "Alternance",
+              "color": "blue"
+            },
+            {
+              "value": "FC_DIPLOMANTE",
+              "label": "FC diplômante",
+              "color": "purple"
+            },
+            {
+              "value": "FC_COURTE",
+              "label": "FC courte",
+              "color": "orange"
+            }
+          ]
+        },
+        {
+          "name": "actif",
+          "label": "Au catalogue",
+          "type": "BOOLEAN",
+          "defaultValue": true
+        },
+        {
+          "name": "entite",
+          "label": "Entité",
+          "type": "RELATION",
+          "relatedObject": "entite",
+          "relatedLabel": "Formations"
+        }
+      ]
+    },
+    "actionDeFormation": {
+      "labelSingular": "Action de formation",
+      "labelPlural": "Actions de formation",
+      "description": "Instance datée d'une formation (session/groupe/promo).",
+      "icon": "IconCalendarEvent",
+      "labelIdentifier": "code",
+      "fields": [
+        {
+          "name": "code",
+          "label": "Code session",
+          "type": "TEXT",
+          "isNullable": false
+        },
+        {
+          "name": "dateDebut",
+          "label": "Date début",
+          "type": "DATE_TIME"
+        },
+        {
+          "name": "dateFin",
+          "label": "Date fin",
+          "type": "DATE_TIME"
+        },
+        {
+          "name": "statut",
+          "label": "Statut",
+          "type": "SELECT",
+          "options": [
+            {
+              "value": "PREVUE",
+              "label": "Prévue",
+              "color": "gray"
+            },
+            {
+              "value": "EN_COURS",
+              "label": "En cours",
+              "color": "blue"
+            },
+            {
+              "value": "TERMINEE",
+              "label": "Terminée",
+              "color": "green"
+            },
+            {
+              "value": "ANNULEE",
+              "label": "Annulée",
+              "color": "red"
+            }
+          ],
+          "defaultValue": "PREVUE"
+        },
+        {
+          "name": "formation",
+          "label": "Formation",
+          "type": "RELATION",
+          "relatedObject": "formation",
+          "relatedLabel": "Actions de formation"
+        },
+        {
+          "name": "entite",
+          "label": "Entité",
+          "type": "RELATION",
+          "relatedObject": "entite",
+          "relatedLabel": "Actions de formation"
+        }
+      ]
+    },
+    "contrat": {
+      "labelSingular": "Contrat",
+      "labelPlural": "Contrats",
+      "description": "Objet unifié : apprentissage / pro / convention FC dipl / convention FC courte (D4).",
+      "icon": "IconFileSignature",
+      "labelIdentifier": "numero",
+      "fields": [
+        {
+          "name": "numero",
+          "label": "Numéro",
+          "type": "TEXT",
+          "isNullable": false
+        },
+        {
+          "name": "typeContrat",
+          "label": "Type",
+          "type": "SELECT",
+          "options": [
+            {
+              "value": "APPRENTISSAGE",
+              "label": "Apprentissage",
+              "color": "blue"
+            },
+            {
+              "value": "PROFESSIONNALISATION",
+              "label": "Professionnalisation",
+              "color": "sky"
+            },
+            {
+              "value": "CONVENTION_FC_DIPL",
+              "label": "Convention FC dipl.",
+              "color": "purple"
+            },
+            {
+              "value": "CONVENTION_FC_COURTE",
+              "label": "Convention FC courte",
+              "color": "orange"
+            }
+          ]
+        },
+        {
+          "name": "dateSignature",
+          "label": "Date signature",
+          "type": "DATE_TIME"
+        },
+        {
+          "name": "dateDebut",
+          "label": "Date début",
+          "type": "DATE_TIME"
+        },
+        {
+          "name": "dateFin",
+          "label": "Date fin",
+          "type": "DATE_TIME"
+        },
+        {
+          "name": "statut",
+          "label": "Statut",
+          "type": "SELECT",
+          "options": [
+            {
+              "value": "EN_PREPARATION",
+              "label": "En préparation",
+              "color": "gray"
+            },
+            {
+              "value": "SIGNE",
+              "label": "Signé",
+              "color": "yellow"
+            },
+            {
+              "value": "ACTIF",
+              "label": "Actif",
+              "color": "green"
+            },
+            {
+              "value": "TERMINE",
+              "label": "Terminé",
+              "color": "blue"
+            },
+            {
+              "value": "ROMPU",
+              "label": "Rompu",
+              "color": "red"
+            }
+          ],
+          "defaultValue": "EN_PREPARATION"
+        },
+        {
+          "name": "apprenant",
+          "label": "Apprenant",
+          "type": "RELATION",
+          "relatedObject": "apprenant",
+          "relatedLabel": "Contrats"
+        },
+        {
+          "name": "actionDeFormation",
+          "label": "Action de formation",
+          "type": "RELATION",
+          "relatedObject": "actionDeFormation",
+          "relatedLabel": "Contrats"
+        },
+        {
+          "name": "entite",
+          "label": "Entité",
+          "type": "RELATION",
+          "relatedObject": "entite",
+          "relatedLabel": "Contrats"
+        },
+        {
+          "name": "entrepriseEmployeur",
+          "label": "Entreprise employeur",
+          "type": "RELATION",
+          "relatedObject": "company",
+          "relatedLabel": "Contrats alternants",
+          "_note": "Null pour les conventions FC. Pointe vers Company (natif)."
+        }
+      ]
+    },
+    "dossierFinancement": {
+      "labelSingular": "Dossier de financement",
+      "labelPlural": "Dossiers de financement",
+      "description": "CPF / AIF / POEI / Plan de dev / OPCO / Auto-financement.",
+      "icon": "IconCash",
+      "labelIdentifier": "numero",
+      "fields": [
+        {
+          "name": "numero",
+          "label": "Numéro",
+          "type": "TEXT",
+          "isNullable": false
+        },
+        {
+          "name": "typeFinancement",
+          "label": "Type",
+          "type": "SELECT",
+          "options": [
+            {
+              "value": "CPF",
+              "label": "CPF",
+              "color": "blue"
+            },
+            {
+              "value": "AIF",
+              "label": "AIF",
+              "color": "sky"
+            },
+            {
+              "value": "POEI",
+              "label": "POEI",
+              "color": "green"
+            },
+            {
+              "value": "PLAN_DEV",
+              "label": "Plan de dev",
+              "color": "purple"
+            },
+            {
+              "value": "OPCO",
+              "label": "OPCO",
+              "color": "yellow"
+            },
+            {
+              "value": "AUTO",
+              "label": "Auto",
+              "color": "gray"
+            }
+          ]
+        },
+        {
+          "name": "montant",
+          "label": "Montant (€)",
+          "type": "NUMBER"
+        },
+        {
+          "name": "dateDepot",
+          "label": "Date dépôt",
+          "type": "DATE_TIME"
+        },
+        {
+          "name": "dateDecision",
+          "label": "Date décision",
+          "type": "DATE_TIME"
+        },
+        {
+          "name": "statut",
+          "label": "Statut",
+          "type": "SELECT",
+          "options": [
+            {
+              "value": "A_MONTER",
+              "label": "À monter",
+              "color": "gray"
+            },
+            {
+              "value": "DEPOSE",
+              "label": "Déposé",
+              "color": "yellow"
+            },
+            {
+              "value": "VALIDE",
+              "label": "Validé",
+              "color": "green"
+            },
+            {
+              "value": "REFUSE",
+              "label": "Refusé",
+              "color": "red"
+            },
+            {
+              "value": "PAYE",
+              "label": "Payé",
+              "color": "blue"
+            }
+          ],
+          "defaultValue": "A_MONTER"
+        },
+        {
+          "name": "apprenant",
+          "label": "Apprenant",
+          "type": "RELATION",
+          "relatedObject": "apprenant",
+          "relatedLabel": "Dossiers de financement"
+        },
+        {
+          "name": "contrat",
+          "label": "Contrat",
+          "type": "RELATION",
+          "relatedObject": "contrat",
+          "relatedLabel": "Dossiers de financement"
+        },
+        {
+          "name": "entite",
+          "label": "Entité",
+          "type": "RELATION",
+          "relatedObject": "entite",
+          "relatedLabel": "Dossiers de financement"
+        }
+      ]
+    },
+    "documentApprenant": {
+      "labelSingular": "Document apprenant",
+      "labelPlural": "Documents apprenant",
+      "description": "Un record par document Qualiopi (D5). Type laissé en TEXT en J2, à enum-iser en J3 avec les 21 types finalisés.",
+      "icon": "IconFileText",
+      "labelIdentifier": "intitule",
+      "fields": [
+        {
+          "name": "intitule",
+          "label": "Intitulé",
+          "type": "TEXT",
+          "isNullable": false
+        },
+        {
+          "name": "typeDocument",
+          "label": "Type document",
+          "type": "TEXT",
+          "_todo_j3": "Convertir en SELECT avec 21 valeurs Qualiopi (convention, devis, fiche besoin, attestation assiduité, livret apprentissage, etc.)"
+        },
+        {
+          "name": "dateEmission",
+          "label": "Date émission",
+          "type": "DATE_TIME"
+        },
+        {
+          "name": "dateSignature",
+          "label": "Date signature",
+          "type": "DATE_TIME"
+        },
+        {
+          "name": "statut",
+          "label": "Statut",
+          "type": "SELECT",
+          "options": [
+            {
+              "value": "A_PRODUIRE",
+              "label": "À produire",
+              "color": "gray"
+            },
+            {
+              "value": "PRODUIT",
+              "label": "Produit",
+              "color": "yellow"
+            },
+            {
+              "value": "SIGNE",
+              "label": "Signé",
+              "color": "green"
+            },
+            {
+              "value": "ARCHIVE",
+              "label": "Archivé",
+              "color": "blue"
+            }
+          ],
+          "defaultValue": "A_PRODUIRE"
+        },
+        {
+          "name": "apprenant",
+          "label": "Apprenant",
+          "type": "RELATION",
+          "relatedObject": "apprenant",
+          "relatedLabel": "Documents"
+        },
+        {
+          "name": "entite",
+          "label": "Entité",
+          "type": "RELATION",
+          "relatedObject": "entite",
+          "relatedLabel": "Documents apprenant"
+        }
+      ]
+    },
+    "offreAlternance": {
+      "labelSingular": "Offre d'alternance",
+      "labelPlural": "Offres d'alternance",
+      "description": "Offre d'emploi en alternance pour matching avec les apprenants.",
+      "icon": "IconBriefcase",
+      "labelIdentifier": "intitule",
+      "fields": [
+        {
+          "name": "intitule",
+          "label": "Intitulé",
+          "type": "TEXT",
+          "isNullable": false
+        },
+        {
+          "name": "datePublication",
+          "label": "Date publication",
+          "type": "DATE_TIME"
+        },
+        {
+          "name": "dateLimite",
+          "label": "Date limite",
+          "type": "DATE_TIME"
+        },
+        {
+          "name": "statut",
+          "label": "Statut",
+          "type": "SELECT",
+          "options": [
+            {
+              "value": "OUVERTE",
+              "label": "Ouverte",
+              "color": "green"
+            },
+            {
+              "value": "MATCHING_EN_COURS",
+              "label": "Matching en cours",
+              "color": "blue"
+            },
+            {
+              "value": "POURVUE",
+              "label": "Pourvue",
+              "color": "purple"
+            },
+            {
+              "value": "FERMEE",
+              "label": "Fermée",
+              "color": "gray"
+            }
+          ],
+          "defaultValue": "OUVERTE"
+        },
+        {
+          "name": "entreprise",
+          "label": "Entreprise",
+          "type": "RELATION",
+          "relatedObject": "company",
+          "relatedLabel": "Offres d'alternance"
+        },
+        {
+          "name": "formationCible",
+          "label": "Formation cible",
+          "type": "RELATION",
+          "relatedObject": "formation",
+          "relatedLabel": "Offres d'alternance"
+        },
+        {
+          "name": "entite",
+          "label": "Entité",
+          "type": "RELATION",
+          "relatedObject": "entite",
+          "relatedLabel": "Offres d'alternance"
+        }
+      ]
+    }
+  },
+  "nativeExtensions": {
+    "person": {
+      "fields": [
+        {
+          "name": "rolesPng",
+          "label": "Rôles",
+          "type": "MULTI_SELECT",
+          "description": "Un contact peut cumuler plusieurs rôles (D7).",
+          "options": [
+            {
+              "value": "MAITRE_APPRENTISSAGE",
+              "label": "Maître d'apprentissage",
+              "color": "blue"
+            },
+            {
+              "value": "RH",
+              "label": "RH",
+              "color": "purple"
+            },
+            {
+              "value": "TUTEUR",
+              "label": "Tuteur",
+              "color": "sky"
+            },
+            {
+              "value": "DECIDEUR_ACHAT",
+              "label": "Décideur achat",
+              "color": "yellow"
+            },
+            {
+              "value": "PRESCRIPTEUR",
+              "label": "Prescripteur",
+              "color": "green"
+            }
+          ]
+        },
+        {
+          "name": "contactPrincipal",
+          "label": "Contact principal",
+          "type": "BOOLEAN",
+          "description": "Un seul contact principal par entreprise (règle métier, pas contrainte DB).",
+          "defaultValue": false
+        },
+        {
+          "name": "sourceContact",
+          "label": "Source contact",
+          "type": "SELECT",
+          "description": "Comment le contact a été trouvé.",
+          "options": [
+            {
+              "value": "HUNTER_IO",
+              "label": "Hunter.io",
+              "color": "blue"
+            },
+            {
+              "value": "LINKEDIN",
+              "label": "LinkedIn",
+              "color": "purple"
+            },
+            {
+              "value": "SITE_WEB",
+              "label": "Site web",
+              "color": "sky"
+            },
+            {
+              "value": "APPEL_ENTRANT",
+              "label": "Appel entrant",
+              "color": "green"
+            },
+            {
+              "value": "RECOMMANDATION",
+              "label": "Recommandation",
+              "color": "yellow"
+            }
+          ]
+        },
+        {
+          "name": "statutContact",
+          "label": "Statut contact",
+          "type": "SELECT",
+          "options": [
+            {
+              "value": "A_CONTACTER",
+              "label": "À contacter",
+              "color": "gray"
+            },
+            {
+              "value": "CONTACTE",
+              "label": "Contacté",
+              "color": "yellow"
+            },
+            {
+              "value": "REPONDU",
+              "label": "Répondu",
+              "color": "green"
+            },
+            {
+              "value": "INJOIGNABLE",
+              "label": "Injoignable",
+              "color": "red"
+            }
+          ],
+          "defaultValue": "A_CONTACTER"
+        }
+      ]
+    },
+    "company": {
+      "fields": [
+        {
+          "name": "typeRelation",
+          "label": "Type de relation",
+          "type": "MULTI_SELECT",
+          "description": "Une entreprise peut être à la fois employeur alternant et cliente B2B.",
+          "options": [
+            {
+              "value": "EMPLOYEUR_ALTERNANT",
+              "label": "Employeur alternant",
+              "color": "blue"
+            },
+            {
+              "value": "PRESCRIPTEUR_FC",
+              "label": "Prescripteur FC",
+              "color": "purple"
+            },
+            {
+              "value": "CLIENTE_B2B",
+              "label": "Cliente B2B",
+              "color": "green"
+            },
+            {
+              "value": "PROSPECT",
+              "label": "Prospect",
+              "color": "yellow"
+            }
+          ]
+        },
+        {
+          "name": "secteurActivite",
+          "label": "Secteur d'activité",
+          "type": "SELECT",
+          "options": [
+            {
+              "value": "COMMERCE",
+              "label": "Commerce",
+              "color": "blue"
+            },
+            {
+              "value": "TECH",
+              "label": "Tech",
+              "color": "sky"
+            },
+            {
+              "value": "FINANCE",
+              "label": "Finance",
+              "color": "purple"
+            },
+            {
+              "value": "RH",
+              "label": "RH",
+              "color": "pink"
+            },
+            {
+              "value": "MARKETING",
+              "label": "Marketing",
+              "color": "orange"
+            },
+            {
+              "value": "BTP",
+              "label": "BTP",
+              "color": "yellow"
+            },
+            {
+              "value": "SANTE",
+              "label": "Santé",
+              "color": "red"
+            },
+            {
+              "value": "EDUCATION",
+              "label": "Éducation",
+              "color": "green"
+            },
+            {
+              "value": "AUTRE",
+              "label": "Autre",
+              "color": "gray"
+            }
+          ]
+        },
+        {
+          "name": "tailleEntreprise",
+          "label": "Taille",
+          "type": "SELECT",
+          "options": [
+            {
+              "value": "TPE",
+              "label": "TPE (< 10)",
+              "color": "gray"
+            },
+            {
+              "value": "PME",
+              "label": "PME (10-250)",
+              "color": "blue"
+            },
+            {
+              "value": "ETI",
+              "label": "ETI (250-5000)",
+              "color": "purple"
+            },
+            {
+              "value": "GRAND_COMPTE",
+              "label": "Grand compte (> 5000)",
+              "color": "green"
+            }
+          ]
+        },
+        {
+          "name": "siteWeb",
+          "label": "Site web",
+          "type": "TEXT",
+          "description": "URL complète. company.domainName natif ne stocke que le domaine."
+        },
+        {
+          "name": "sourceEntreprise",
+          "label": "Source entreprise",
+          "type": "SELECT",
+          "description": "Comment l'entreprise a été identifiée.",
+          "options": [
+            {
+              "value": "SCRAPING_INDEED",
+              "label": "Scraping Indeed",
+              "color": "blue"
+            },
+            {
+              "value": "SCRAPING_HELLOWORK",
+              "label": "Scraping Hellowork",
+              "color": "sky"
+            },
+            {
+              "value": "API_LA_BONNE_ALTERNANCE",
+              "label": "API La Bonne Alternance",
+              "color": "purple"
+            },
+            {
+              "value": "PROSPECTION_DIRECTE",
+              "label": "Prospection directe",
+              "color": "orange"
+            },
+            {
+              "value": "PARRAINAGE",
+              "label": "Parrainage",
+              "color": "green"
+            },
+            {
+              "value": "INBOUND",
+              "label": "Inbound",
+              "color": "yellow"
+            }
+          ]
+        },
+        {
+          "name": "statutPartenariat",
+          "label": "Statut partenariat",
+          "type": "SELECT",
+          "options": [
+            {
+              "value": "PROSPECT",
+              "label": "Prospect",
+              "color": "gray"
+            },
+            {
+              "value": "CONTACTE",
+              "label": "Contacté",
+              "color": "yellow"
+            },
+            {
+              "value": "EN_DISCUSSION",
+              "label": "En discussion",
+              "color": "blue"
+            },
+            {
+              "value": "PARTENAIRE_ACTIF",
+              "label": "Partenaire actif",
+              "color": "green"
+            },
+            {
+              "value": "INACTIF",
+              "label": "Inactif",
+              "color": "red"
+            }
+          ],
+          "defaultValue": "PROSPECT"
+        },
+        {
+          "name": "nbContratsSignes",
+          "label": "Nb contrats signés",
+          "type": "NUMBER",
+          "description": "Calculé via workflow (S2). Stocké pour reporting marketing.",
+          "defaultValue": 0
+        }
+      ]
+    }
+  },
+  "pipelines": {
+    "alternance": {
+      "object": "apprenant",
+      "field": "stageAlternance",
+      "stages": [
+        "candidature_recue",
+        "email_bienvenue_envoye",
+        "fiche_besoin_completee",
+        "convoque_tests",
+        "tests_passes",
+        "entretien_motivation_fait",
+        "eligible_placement",
+        "matching_en_cours",
+        "profil_envoye_entreprise",
+        "entretien_entreprise_planifie",
+        "entretien_entreprise_realise",
+        "retenu_par_entreprise",
+        "contrat_cerfa_signe",
+        "en_formation",
+        "diplome",
+        "alumni_upsell"
+      ]
+    },
+    "fc_diplomante": {
+      "object": "apprenant",
+      "field": "stageFcDiplomante",
+      "stages": [
+        "candidature_recue",
+        "email_bienvenue_envoye",
+        "fiche_besoin_completee",
+        "convoque_tests",
+        "tests_passes",
+        "entretien_motivation_fait",
+        "eligible_inscription",
+        "dossier_financement_a_monter",
+        "dossier_financement_en_cours",
+        "financement_valide_convention_signee",
+        "en_formation",
+        "diplome"
+      ]
+    },
+    "fc_courte": {
+      "object": "apprenant",
+      "field": "stageFcCourte",
+      "stages": [
+        "demande_information",
+        "devis_envoye",
+        "devis_accepte",
+        "convention_signee",
+        "confirmation_inscription",
+        "en_formation",
+        "formation_terminee_attestation_envoyee",
+        "satisfaction_recueillie"
+      ]
+    }
+  }
+}
